@@ -1,7 +1,7 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
-from app.security.auth import hash_password
-from app.security.auth import verify_password
+from app.security.auth import hash_password, verify_password, create_access_token, get_current_user
+
 
 router = APIRouter(
     prefix="/auth",
@@ -35,7 +35,9 @@ def register(data: RegisterRequest):
         "username": data.username,
 
         # store hashed pw
-        "password": hash_password(data.password)
+        "password": hash_password(data.password),
+
+        "role": "user"
     }
 
     return {
@@ -57,6 +59,17 @@ def login(data: LoginRequest):
             "error": "wrong password"
         }
 
+    # create jwt token
+    token = create_access_token({
+        "sub": data.username,
+        "role": data.role
+    })
+
     return {
-        "message": "login successful"
+        "access_token": token,
+        "token_type": "bearer"
     }
+
+@router.get("/me")
+def me(user = Depends(get_current_user)):
+    return user
