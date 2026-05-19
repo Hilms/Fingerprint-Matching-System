@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 from app.security.auth import hash_password, verify_password, create_access_token, get_current_user
-
+from app.security.permission import require_role
 
 router = APIRouter(
     prefix="/auth",
@@ -73,3 +73,10 @@ def login(data: LoginRequest):
 @router.get("/me")
 def me(user = Depends(get_current_user)):
     return user
+
+@router.post("/upload")
+def upload(
+    user = Depends(get_current_user),
+    _ = Depends(require_role("admin"))
+):
+    return {"message": "admin upload ok"}

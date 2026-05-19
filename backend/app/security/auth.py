@@ -64,5 +64,5 @@ def get_current_user(
 
     return {
         "username": payload.get("sub"),
-        "role": payload.get("role")
+        "role": payload.get("role", "user")
     }
