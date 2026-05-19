@@ -1,0 +1,57 @@
+# -------------------------
+# OS files
+# -------------------------
+.DS_Store
+Thumbs.db
+
+# -------------------------
+# IDEs
+# -------------------------
+.idea/
+.vscode/
+*.iml
+
+# -------------------------
+# Python (FastAPI backend)
+# -------------------------
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+#.env
+#.venv/
+#venv/
+#env/
+
+# -------------------------
+# Node / Angular frontend
+# -------------------------
+node_modules/
+dist/
+.angular/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# -------------------------
+# Docker
+# -------------------------
+*.log
+
+# -------------------------
+# Database (Postgres local dumps)
+# -------------------------
+*.sql~
+*.dump
+
+# -------------------------
+# MinIO / storage (if you ever mount locally)
+# -------------------------
+minio-data/
+database/data/
+
+# -------------------------
+# Environment files (IMPORTANT)
+# -------------------------
+# .env
+# since this is no production i push my secrets to github
