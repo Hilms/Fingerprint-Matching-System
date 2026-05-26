@@ -12,12 +12,12 @@ fake_users = {
 
 class UserService:
 
-    def get_user(self, username: str):
+    async def get_user(self, username: str):
 
         return fake_users.get(username)
 
 
-    def search_user(self, query: str):
+    async def search_user(self, query: str):
 
         results = []
 
@@ -29,7 +29,7 @@ class UserService:
         return results
 
 
-    def delete_user(self, username: str):
+    async def delete_user(self, username: str):
 
         if username not in fake_users:
             return {
@@ -43,7 +43,7 @@ class UserService:
         }
 
 
-    def update_user(self, username: str):
+    async def update_user(self, username: str):
 
         if username not in fake_users:
             return {

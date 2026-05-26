@@ -1,14 +1,12 @@
 class SubjectService:
 
-    def create_subject(self, data: dict):
+    async def create_subject(self, data: dict):
 
         # check if subject already exists
-        existing = self.get_subject_by_ref_id(data["ref_id"])
+        existing = await self.get_subject_by_ref_id(data["ref_id"])
 
         if existing:
-            return {
-                "error": "subject already exists"
-            }
+            raise ValueError("subject already exists")
 
         # later:
         # insert into database
@@ -18,17 +16,20 @@ class SubjectService:
             "subject": data
         }
 
-    def delete_subject(self, subject_id: int):
+
+    async def delete_subject(self, subject_id: int):
 
         # later:
         # delete fingerprints first
+        # delete storage files
         # delete subject
 
         return {
             "message": f"subject {subject_id} deleted"
         }
 
-    def get_subject(self, subject_id: int):
+
+    async def get_subject(self, subject_id: int):
 
         # later:
         # select * from subjects where id=...
@@ -43,13 +44,15 @@ class SubjectService:
             "country": "Germany"
         }
 
-    def get_subject_by_ref_id(self, ref_id: str):
+
+    async def get_subject_by_ref_id(self, ref_id: str):
 
         # later db query
 
         return None
 
-    def search_subjects(self, query: str):
+
+    async def search_subjects(self, query: str):
 
         # later:
         # search by:
@@ -66,11 +69,11 @@ class SubjectService:
             }
         ]
 
-    def update_subject(self, subject_id: int, data: dict):
+
+    async def update_subject(self, subject_id: int, data: dict):
 
         # later update query
 
         return {
             "message": f"subject {subject_id} updated"
         }
-

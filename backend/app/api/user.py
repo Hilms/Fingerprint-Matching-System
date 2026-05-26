@@ -11,14 +11,14 @@ router = APIRouter(
 user_service = UserService()
 
 @router.get("/search")
-def search_user(
+async def search_user(
     query: str,
     current_user = Depends(get_current_user)
 ):
-    return user_service.search_user(query)
+    return await user_service.search_user(query)
 
 @router.get("/{username}")
-def get_user(
+async def get_user(
     username: str,
     current_user = Depends(get_current_user)
 ):
@@ -30,19 +30,19 @@ def get_user(
             detail="User not found"
         )
 
-    return user
+    return await user
 
 @router.delete("/{username}")
-def delete_user(
+async def delete_user(
     username: str,
     current_user = Depends(get_current_user)
 ):
-    return user_service.delete_user(username)
+    return await user_service.delete_user(username)
 
 
 @router.put("/{username}")
-def update_user(
+async def update_user(
     username: str,
     current_user = Depends(get_current_user)
 ):
-    return user_service.update_user(username)
+    return await user_service.update_user(username)

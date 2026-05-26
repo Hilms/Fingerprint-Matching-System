@@ -1,10 +1,11 @@
 class FingerprintService:
 
-    def upload_fingerprint(
+    async def upload_fingerprint(
         self,
         file,
         subject_id: int,
-        user
+        metadata: dict,
+        user: dict
     ):
 
         # 1. validate user
@@ -17,7 +18,18 @@ class FingerprintService:
             "message": "fingerprint uploaded"
         }
 
-    def delete_fingerprint(self, fingerprint_id: int):
+
+    async def create_fingerprint(self, data: dict):
+
+        # 1. insert DB record
+        # 2. later add embedding
+
+        return {
+            "message": "fingerprint created"
+        }
+
+
+    async def delete_fingerprint(self, fingerprint_id: int):
 
         # 1. get fingerprint
         # 2. delete image from storage
@@ -27,7 +39,8 @@ class FingerprintService:
             "message": f"fingerprint {fingerprint_id} deleted"
         }
 
-    def search_fingerprints(self, query: str):
+
+    async def search_fingerprints(self, query: str):
 
         # search metadata
         # search subject relation
@@ -35,10 +48,8 @@ class FingerprintService:
 
         return []
 
-    def get_fingerprint_metadata(
-        self,
-        fingerprint_id: int
-    ):
+
+    async def get_fingerprint_metadata(self, fingerprint_id: int):
 
         return {
             "id": fingerprint_id,
@@ -46,10 +57,8 @@ class FingerprintService:
             "image_path": "fingerprints/1/image.jpg"
         }
 
-    def get_fingerprint_subject(
-        self,
-        fingerprint_id: int
-    ):
+
+    async def get_fingerprint_subject(self, fingerprint_id: int):
 
         # later:
         # fingerprint -> subject_id

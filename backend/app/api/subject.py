@@ -16,6 +16,7 @@ router = APIRouter(
 subject_service = SubjectService()
 storage_service = StorageService()
 
+
 class SubjectCreate(BaseModel):
     ref_id: str
     name: str
@@ -32,44 +33,49 @@ class SubjectUpdate(BaseModel):
     city: str
     country: str
 
+
 @router.post("/")
-def create_subject(
+async def create_subject(
     data: SubjectCreate,
     user=Depends(get_current_user),
     _=Depends(require_role("admin"))
 ):
-    return subject_service.create_subject(data.dict())
+    return await subject_service.create_subject(data.dict())
+
 
 @router.get("/{subject_id}")
-def get_subject(
+async def get_subject(
     subject_id: int,
     user=Depends(get_current_user)
 ):
-    return subject_service.get_subject(subject_id)
+    return await subject_service.get_subject(subject_id)
+
 
 @router.get("/search/")
-def search_subjects(
+async def search_subjects(
     q: str,
     user=Depends(get_current_user)
 ):
-    return subject_service.search_subjects(q)
+    return await subject_service.search_subjects(q)
+
 
 @router.put("/{subject_id}")
-def update_subject(
+async def update_subject(
     subject_id: int,
     data: SubjectUpdate,
     user=Depends(get_current_user),
     _=Depends(require_role("admin"))
 ):
-    return subject_service.update_subject(
+    return await subject_service.update_subject(
         subject_id,
         data.dict()
     )
 
+
 @router.delete("/{subject_id}")
-def delete_subject(
+async def delete_subject(
     subject_id: int,
     user=Depends(get_current_user),
     _=Depends(require_role("admin"))
 ):
-    return subject_service.delete_subject(subject_id)
+    return await subject_service.delete_subject(subject_id)

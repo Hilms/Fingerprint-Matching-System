@@ -15,50 +15,74 @@ router = APIRouter(
 fingerprint_service = FingerprintService()
 storage_service = StorageService()
 
+
+class FingerprintCreate(BaseModel):
+    subject_id: int
+    sex: str
+    hand: str
+    finger: str
+    filename: str
+
+
+
+# UPLOAD (ADMIN)
 @router.post("/upload")
-def upload_fingerprint(
+async def upload_fingerprint(
     subject_id: int,
     file: UploadFile = File(...),
     user=Depends(get_current_user),
     _=Depends(require_role("admin"))
 ):
-    return fingerprint_service.upload_fingerprint(
+    return await fingerprint_service.upload_fingerprint(
         file,
         subject_id,
         user
     )
 
+# CREATE FINGERPRINT (MANUAL / IMPORT USE CASE / ADMIN)
+@router.post("/")
+async def create_fingerprint(
+    data: FingerprintCreate,
+    user=Depends(get_current_user),
+    _=Depends(require_role("admin"))
+):
+    return await fingerprint_service.create_fingerprint()
+
+# SEARCH (USER + ADMIN)
 @router.get("/search")
-def search_fingerprints(
+async def search_fingerprints(
     q: str,
     user=Depends(get_current_user)
 ):
-    return fingerprint_service.search_fingerprints(q)
+    return await fingerprint_service.search_fingerprints(q)
 
+# METADATA
 @router.get("/{fingerprint_id}")
-def get_metadata(
+async def get_metadata(
     fingerprint_id: int,
     user=Depends(get_current_user)
 ):
-    return fingerprint_service.get_fingerprint_metadata(
+    return await fingerprint_service.get_fingerprint_metadata(
         fingerprint_id
     )
 
+# SUBJECT FROM FINGERPRINT
 @router.get("/{fingerprint_id}/subject")
-def get_subject(
+async def get_subject(
     fingerprint_id: int,
     user=Depends(get_current_user)
 ):
-    return fingerprint_service.get_fingerprint_subject(
+    return await fingerprint_service.get_fingerprint_subject(
         fingerprint_id
     )
 
+# DELETE (ADMIN)
 @router.delete("/{fingerprint_id}")
-def delete_fingerprint(
+async def delete_fingerprint(
     fingerprint_id: int,
     user=Depends(get_current_user),
     _=Depends(require_role("admin"))
 ):
-    return fingerprint_service.delete_fingerprint(
+    return await fingerprint_service.delete_fingerprint(
         fingerprint_id
     )
