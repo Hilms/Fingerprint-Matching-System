@@ -23,6 +23,7 @@ services:
       - "${BACKEND_PORT}:8000"
     volumes:
       - ./backend:/app
+      - ./import:/app/import
     depends_on:
       - db
       - minio

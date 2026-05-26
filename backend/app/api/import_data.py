@@ -1,31 +1,25 @@
+import os
 from fastapi import APIRouter, Depends
 
 from app.security.auth import get_current_user
 from app.security.permission import require_role
+from app.dependencies import import_service
 
-from app.services.import_service import ImportService
-from app.services.storage_service import StorageService
+router = APIRouter(prefix="/imports", tags=["imports"])
 
+SUBJECTS_CSV_PATH = os.getenv("IMPORT_SUBJECTS_CSV_PATH")
+FINGERPRINTS_DIR_PATH = os.getenv("IMPORT_FINGERPRINTS_DIR_PATH")
 
-router = APIRouter(
-    prefix="/imports",
-    tags=["imports"]
-)
-
-import_service = ImportService()
-storage_service = StorageService()
-
-# DATASET IMPORT
-# ADMIN ONLY
 
 @router.post("/dataset")
-def import_dataset(
+async def import_data(
     user=Depends(get_current_user),
     _=Depends(require_role("admin"))
 ):
 
-    return import_service.import_dataset(
-        images_folder="dataset/images",
-        subjects_file="dataset/subjects.csv",
-        user=user
+    return await import_service.import_data(
+        subjects_csv=SUBJECTS_CSV_PATH,
+        fingerprints_dir=FINGERPRINTS_DIR_PATH
     )
+
+

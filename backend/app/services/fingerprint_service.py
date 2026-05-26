@@ -1,14 +1,12 @@
-# app/services/fingerprint_service.py
-
 class FingerprintService:
 
     def __init__(
         self,
-        db,
+        database,
         storage_service,
         subject_service
     ):
-        self.db = db
+        self.db = database
         self.storage_service = storage_service
         self.subject_service = subject_service
 
@@ -37,10 +35,39 @@ class FingerprintService:
         # 1. insert DB record
         # 2. later add embedding
 
-        return {
-            "message": "fingerprint created",
-            "fingerprint": data
-        }
+        query = """
+            INSERT INTO fingerprints (
+                subject_id,
+                image_url,
+                sex,
+                hand,
+                finger,
+                filename
+            )
+            VALUES (
+                :subject_id,
+                :image_url,
+                :sex,
+                :hand,
+                :finger,
+                :filename
+            )
+            RETURNING *
+        """
+
+        fingerprint = await self.db.fetch_one(
+            query=query,
+            values={
+                "subject_id": data["subject_id"],
+                "image_url": data["image_url"],
+                "sex": data["sex"],
+                "hand": data["hand"],
+                "finger": data["finger"],
+                "filename": data["filename"]
+            }
+        )
+
+        return dict(fingerprint)
 
     async def delete_fingerprint(
         self,
