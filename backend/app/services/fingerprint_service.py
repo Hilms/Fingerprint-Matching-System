@@ -1,11 +1,22 @@
+# app/services/fingerprint_service.py
+
 class FingerprintService:
+
+    def __init__(
+        self,
+        db,
+        storage_service,
+        subject_service
+    ):
+        self.db = db
+        self.storage_service = storage_service
+        self.subject_service = subject_service
 
     async def upload_fingerprint(
         self,
         file,
         subject_id: int,
-        metadata: dict,
-        user: dict
+        user
     ):
 
         # 1. validate user
@@ -18,18 +29,23 @@ class FingerprintService:
             "message": "fingerprint uploaded"
         }
 
-
-    async def create_fingerprint(self, data: dict):
+    async def create_fingerprint(
+        self,
+        data: dict
+    ):
 
         # 1. insert DB record
         # 2. later add embedding
 
         return {
-            "message": "fingerprint created"
+            "message": "fingerprint created",
+            "fingerprint": data
         }
 
-
-    async def delete_fingerprint(self, fingerprint_id: int):
+    async def delete_fingerprint(
+        self,
+        fingerprint_id: int
+    ):
 
         # 1. get fingerprint
         # 2. delete image from storage
@@ -39,8 +55,10 @@ class FingerprintService:
             "message": f"fingerprint {fingerprint_id} deleted"
         }
 
-
-    async def search_fingerprints(self, query: str):
+    async def search_fingerprints(
+        self,
+        query: str
+    ):
 
         # search metadata
         # search subject relation
@@ -48,8 +66,10 @@ class FingerprintService:
 
         return []
 
-
-    async def get_fingerprint_metadata(self, fingerprint_id: int):
+    async def get_fingerprint_metadata(
+        self,
+        fingerprint_id: int
+    ):
 
         return {
             "id": fingerprint_id,
@@ -57,8 +77,10 @@ class FingerprintService:
             "image_path": "fingerprints/1/image.jpg"
         }
 
-
-    async def get_fingerprint_subject(self, fingerprint_id: int):
+    async def get_fingerprint_subject(
+        self,
+        fingerprint_id: int
+    ):
 
         # later:
         # fingerprint -> subject_id

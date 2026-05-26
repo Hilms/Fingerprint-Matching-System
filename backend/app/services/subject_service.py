@@ -1,12 +1,22 @@
+from fastapi import HTTPException
+
 class SubjectService:
+
+    def __init__(self, db):
+        self.db = db
 
     async def create_subject(self, data: dict):
 
         # check if subject already exists
-        existing = await self.get_subject_by_ref_id(data["ref_id"])
+        existing = await self.get_subject_by_ref_id(
+            data["ref_id"]
+        )
 
         if existing:
-            raise ValueError("subject already exists")
+            raise HTTPException(
+                status_code=409,
+                detail="subject already exists"
+            )
 
         # later:
         # insert into database
@@ -15,7 +25,6 @@ class SubjectService:
             "message": "subject created",
             "subject": data
         }
-
 
     async def delete_subject(self, subject_id: int):
 
@@ -27,7 +36,6 @@ class SubjectService:
         return {
             "message": f"subject {subject_id} deleted"
         }
-
 
     async def get_subject(self, subject_id: int):
 
@@ -44,13 +52,11 @@ class SubjectService:
             "country": "Germany"
         }
 
-
     async def get_subject_by_ref_id(self, ref_id: str):
 
         # later db query
 
         return None
-
 
     async def search_subjects(self, query: str):
 
@@ -69,8 +75,11 @@ class SubjectService:
             }
         ]
 
-
-    async def update_subject(self, subject_id: int, data: dict):
+    async def update_subject(
+        self,
+        subject_id: int,
+        data: dict
+    ):
 
         # later update query
 

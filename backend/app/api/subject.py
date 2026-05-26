@@ -4,17 +4,13 @@ from pydantic import BaseModel
 from app.security.auth import get_current_user
 from app.security.permission import require_role
 
-from app.services.subject_service import SubjectService
-from app.services.storage_service import StorageService
+from app.dependencies import subject_service
 
 
 router = APIRouter(
     prefix="/subjects",
     tags=["subjects"]
 )
-
-subject_service = SubjectService()
-storage_service = StorageService()
 
 
 class SubjectCreate(BaseModel):
@@ -43,20 +39,20 @@ async def create_subject(
     return await subject_service.create_subject(data.dict())
 
 
-@router.get("/{subject_id}")
-async def get_subject(
-    subject_id: int,
-    user=Depends(get_current_user)
-):
-    return await subject_service.get_subject(subject_id)
-
-
 @router.get("/search/")
 async def search_subjects(
     q: str,
     user=Depends(get_current_user)
 ):
     return await subject_service.search_subjects(q)
+
+
+@router.get("/{subject_id}")
+async def get_subject(
+    subject_id: int,
+    user=Depends(get_current_user)
+):
+    return await subject_service.get_subject(subject_id)
 
 
 @router.put("/{subject_id}")

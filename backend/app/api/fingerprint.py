@@ -4,16 +4,12 @@ from pydantic import BaseModel
 from app.security.auth import get_current_user
 from app.security.permission import require_role
 
-from app.services.fingerprint_service import FingerprintService
-from app.services.storage_service import StorageService
+from app.dependencies import fingerprint_service
 
 router = APIRouter(
     prefix="/fingerprints",
     tags=["fingerprints"]
 )
-
-fingerprint_service = FingerprintService()
-storage_service = StorageService()
 
 
 class FingerprintCreate(BaseModel):
@@ -22,7 +18,6 @@ class FingerprintCreate(BaseModel):
     hand: str
     finger: str
     filename: str
-
 
 
 # UPLOAD (ADMIN)
@@ -39,6 +34,7 @@ async def upload_fingerprint(
         user
     )
 
+
 # CREATE FINGERPRINT (MANUAL / IMPORT USE CASE / ADMIN)
 @router.post("/")
 async def create_fingerprint(
@@ -46,7 +42,10 @@ async def create_fingerprint(
     user=Depends(get_current_user),
     _=Depends(require_role("admin"))
 ):
-    return await fingerprint_service.create_fingerprint()
+    return await fingerprint_service.create_fingerprint(
+        data.dict()
+    )
+
 
 # SEARCH (USER + ADMIN)
 @router.get("/search")
@@ -55,6 +54,7 @@ async def search_fingerprints(
     user=Depends(get_current_user)
 ):
     return await fingerprint_service.search_fingerprints(q)
+
 
 # METADATA
 @router.get("/{fingerprint_id}")
@@ -66,6 +66,7 @@ async def get_metadata(
         fingerprint_id
     )
 
+
 # SUBJECT FROM FINGERPRINT
 @router.get("/{fingerprint_id}/subject")
 async def get_subject(
@@ -75,6 +76,7 @@ async def get_subject(
     return await fingerprint_service.get_fingerprint_subject(
         fingerprint_id
     )
+
 
 # DELETE (ADMIN)
 @router.delete("/{fingerprint_id}")
