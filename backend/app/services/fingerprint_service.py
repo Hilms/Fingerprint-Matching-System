@@ -1,25 +1,61 @@
 class FingerprintService:
 
-    def upload_fingerprint(self, file, subject_name: str, user):
-        # 4. DB insert
-        # 1. subject service
-        # 2. storage service
-        pass
+    def upload_fingerprint(
+        self,
+        file,
+        subject_id: int,
+        user
+    ):
 
-    def delete_fingerprint(self, id: int):
-        # DB delete
-        # delete subject
-        # storage delete
-        pass
+        # 1. validate user
+        # 2. validate subject exists
+        # 3. upload image to storage
+        # 4. create fingerprint entry
+        # 5. later create embedding
 
-    def search_fingerprint(self, query: str):
-        # DB search metadata
-        # get subject
-        # get image
-        pass
+        return {
+            "message": "fingerprint uploaded"
+        }
 
-    def get_metadata(self, id: int):
-        pass
+    def delete_fingerprint(self, fingerprint_id: int):
 
-    def get_subject(self, id: int):
-        pass
+        # 1. get fingerprint
+        # 2. delete image from storage
+        # 3. delete fingerprint from DB
+
+        return {
+            "message": f"fingerprint {fingerprint_id} deleted"
+        }
+
+    def search_fingerprints(self, query: str):
+
+        # search metadata
+        # search subject relation
+        # return image info
+
+        return []
+
+    def get_fingerprint_metadata(
+        self,
+        fingerprint_id: int
+    ):
+
+        return {
+            "id": fingerprint_id,
+            "subject_id": 1,
+            "image_path": "fingerprints/1/image.jpg"
+        }
+
+    def get_fingerprint_subject(
+        self,
+        fingerprint_id: int
+    ):
+
+        # later:
+        # fingerprint -> subject_id
+        # load subject
+
+        return {
+            "subject_id": 1,
+            "name": "Max Mustermann"
+        }

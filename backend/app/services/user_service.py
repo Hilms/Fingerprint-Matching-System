@@ -1,18 +1,56 @@
+fake_users = {
+    "admin": {
+        "username": "admin",
+        "role": "admin"
+    },
+    "max": {
+        "username": "max",
+        "role": "user"
+    }
+}
+
+
 class UserService:
 
-    def create_user(self, name: str):
-        # check if exists
-        # insert into DB
-        pass
+    def get_user(self, username: str):
 
-    def delete_user(self, name: str):
-        pass
+        return fake_users.get(username)
 
-    def get_user(self, name: str):
-        pass
 
     def search_user(self, query: str):
-        pass
 
-    def update_user(self, name:str):
-        pass
+        results = []
+
+        for user in fake_users.values():
+
+            if query.lower() in user["username"].lower():
+                results.append(user)
+
+        return results
+
+
+    def delete_user(self, username: str):
+
+        if username not in fake_users:
+            return {
+                "error": "User not found"
+            }
+
+        del fake_users[username]
+
+        return {
+            "message": f"{username} deleted"
+        }
+
+
+    def update_user(self, username: str):
+
+        if username not in fake_users:
+            return {
+                "error": "User not found"
+            }
+
+        # placeholder for future DB updates
+        return {
+            "message": f"{username} updated"
+        }
