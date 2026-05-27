@@ -1,6 +1,6 @@
 from pathlib import Path
 import csv
-from app.utils.fingerprint_parser import parse_filename
+from app.utils.fingerprint_parser import FingerprintParser
 
 
 class ImportService:
@@ -39,7 +39,7 @@ class ImportService:
             filename = file_path.name
 
             # validate filename
-            meta = parse_filename(filename)
+            meta = FingerprintParser.parse_filename(filename)
 
             if meta is None:
                 print(f"[SKIP] invalid filename: {filename}")

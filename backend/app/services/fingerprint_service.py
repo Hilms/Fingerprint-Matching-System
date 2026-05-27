@@ -1,5 +1,5 @@
 from fastapi import HTTPException
-from app.utils.fingerprint_parser import parse_filename
+from app.utils.fingerprint_parser import FingerprintParser
 
 class FingerprintService:
 
@@ -26,7 +26,7 @@ class FingerprintService:
 
         filename = file.filename
 
-        meta = parse_filename(filename)
+        meta = FingerprintParser.parse_filename(filename)
 
         if meta is None:
 
