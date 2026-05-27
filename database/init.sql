@@ -32,6 +32,6 @@ CREATE TABLE fingerprints (
     hand TEXT NOT NULL,   -- left / right
     finger TEXT NOT NULL, -- thumb, index, etc.
     filename TEXT NOT NULL, -- uploaded filename
-    feature_vector vector(128),
+    feature_vector vector(128) NOT NULL,
     created_at TIMESTAMP DEFAULT NOW()
 );

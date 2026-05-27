@@ -21,7 +21,7 @@ fingerprint_service = FingerprintService(
 )
 
 import_service = ImportService(
-    database = database,
+    database=database,
     subject_service=subject_service,
     fingerprint_service=fingerprint_service,
     storage_service=storage_service

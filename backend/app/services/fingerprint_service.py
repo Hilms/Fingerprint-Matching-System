@@ -1,5 +1,9 @@
 from fastapi import HTTPException
+import cv2
+import numpy as np
+
 from app.utils.fingerprint_parser import FingerprintParser
+from app.utils.fingerprint_embedder import FingerprintEmbedder
 
 class FingerprintService:
 
@@ -13,10 +17,43 @@ class FingerprintService:
         self.storage_service = storage_service
         self.subject_service = subject_service
 
+    def load_image(self, source):
+
+        # UploadFile
+        if hasattr(source, "file"):
+
+            file_bytes = source.file.read()
+
+            image_array = np.frombuffer(
+                file_bytes,
+                np.uint8
+            )
+
+            image = cv2.imdecode(
+                image_array,
+                cv2.IMREAD_GRAYSCALE
+            )
+
+            # reset cursor for later reuse
+            source.file.seek(0)
+
+            return image
+
+        # local path
+        return cv2.imread(
+            source,
+            cv2.IMREAD_GRAYSCALE
+        )
+
+    def create_embedding(self, source):
+        image = self.load_image(source)
+        return FingerprintEmbedder.extract_embedding(image)
+
+
     # UPLOAD
     async def upload_fingerprint(
         self,
-        file,
+        file, # uploaded file
         user,
         subject_id: int = None,
         subject_data: dict = None
@@ -73,25 +110,25 @@ class FingerprintService:
                 )
             )
 
-        # later:
-        # extract fingerprint embedding/vector
+        embedding = self.embedder.extract_embedding(file)
 
-        # placeholder embedding
-        feature_vector = [0.0] * 128
+        # check duplicate fingerprints
 
-        # check if fingerprint already exists
-
-        # placeholder duplicate check
-        existing_fingerprint = None
+        existing_fingerprint = await self.find_duplicate_fingerprint(
+            embedding
+        )
 
         if existing_fingerprint:
 
             raise HTTPException(
                 status_code=409,
-                detail="fingerprint already exists"
+                detail=(
+                    "similar fingerprint already exists "
+                    f"(fingerprint_id={existing_fingerprint['id']})"
+                )
             )
 
-        object_path = f"fingerprints/{filename}"
+        uploaded_image_path = f"fingerprints/{filename}"
 
         try:
 
@@ -99,7 +136,7 @@ class FingerprintService:
 
             image_url = self.storage_service.upload_image(
                 file=file,
-                object_path=object_path
+                object_path=uploaded_image_path
             )
 
             # DB transaction
@@ -160,14 +197,15 @@ class FingerprintService:
                 detail=str(e)
             )
 
+
     # CREATE
     async def create_fingerprint(
         self,
-        data: dict
+        data: dict,
+        file_path : str
     ):
 
-        # 1. insert DB record
-        # 2. later add embedding
+        embedding = self.create_embedding(file_path)
 
         query = """
             INSERT INTO fingerprints (
@@ -176,7 +214,8 @@ class FingerprintService:
                 sex,
                 hand,
                 finger,
-                filename
+                filename,
+                feature_vector
             )
             VALUES (
                 :subject_id,
@@ -184,7 +223,8 @@ class FingerprintService:
                 :sex,
                 :hand,
                 :finger,
-                :filename
+                :filename,
+                :feature_vector
             )
             RETURNING *
         """
@@ -197,7 +237,8 @@ class FingerprintService:
                 "sex": data["sex"],
                 "hand": data["hand"],
                 "finger": data["finger"],
-                "filename": data["filename"]
+                "filename": data["filename"],
+                "feature_vector": embedding
             }
         )
 
@@ -377,3 +418,38 @@ class FingerprintService:
             )
 
         return dict(subject)
+
+    async def find_duplicate_fingerprint(
+        self,
+        embedding: list[float],
+        threshold: float = 0.05
+    ):
+
+        query = """
+            SELECT
+                id,
+                subject_id,
+                filename,
+                feature_vector <=> :embedding AS distance
+            FROM fingerprints
+            ORDER BY distance ASC
+            LIMIT 1
+        """
+
+        result = await self.db.fetch_one(
+            query=query,
+            values={
+                "embedding": embedding
+            }
+        )
+
+        if not result:
+            return None
+
+        result = dict(result)
+
+        # duplicate detected
+        if result["distance"] <= threshold:
+            return result
+
+        return None

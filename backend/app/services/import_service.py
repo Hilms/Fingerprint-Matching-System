@@ -1,11 +1,17 @@
 from pathlib import Path
 import csv
-from app.utils.fingerprint_parser import FingerprintParser
 
+from app.utils.fingerprint_parser import FingerprintParser
 
 class ImportService:
 
-    def __init__(self, database, storage_service, subject_service, fingerprint_service):
+    def __init__(
+        self,
+        database,
+        storage_service,
+        subject_service,
+        fingerprint_service
+    ):
 
         self.db = database
         self.storage_service = storage_service
@@ -55,10 +61,11 @@ class ImportService:
             uploaded_image_path = f"fingerprints/{filename}"
 
             try:
+
                 # STORAGE
                 image_url = self.storage_service.upload_image(
-                    file=str(file_path),
-                    path=uploaded_image_path
+                    file=str(file_path), # local path
+                    object_path=uploaded_image_path
                 )
 
                 # DB TRANSACTION
@@ -74,13 +81,13 @@ class ImportService:
                     })
 
                     fingerprint = await self.fingerprint_service.create_fingerprint({
-                        "subject_id":subject["id"],
-                        "image_url":image_url,
-                        "sex":meta["sex"],
-                        "hand":meta["hand"],
-                        "finger":meta["finger"],
-                        "filename":filename
-                    })
+                        "subject_id": subject["id"],
+                        "image_url": image_url,
+                        "sex": meta["sex"],
+                        "hand": meta["hand"],
+                        "finger": meta["finger"],
+                        "filename": filename
+                    }, file_path = str(file_path)) # local path
 
                 print(f"[OK] imported: {filename}")
 
