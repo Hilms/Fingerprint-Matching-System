@@ -17,6 +17,7 @@ CREATE TABLE subjects (
     address TEXT NOT NULL,
     city TEXT NOT NULL,
     country TEXT NOT NULL,
+    has_fingerprints BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT NOW()
 );
 

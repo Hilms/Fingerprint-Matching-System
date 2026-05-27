@@ -1,6 +1,7 @@
 from pathlib import Path
 import csv
-import re
+from app.utils.fingerprint_parser import parse_filename
+
 
 class ImportService:
 
@@ -10,42 +11,6 @@ class ImportService:
         self.storage_service = storage_service
         self.subject_service = subject_service
         self.fingerprint_service = fingerprint_service
-
-
-
-    FILENAME_PATTERN = re.compile(
-        r"^(\d+)__(M|F)_(Left|Right)_(thumb|index|middle|ring|little)_finger\.BMP$",
-        re.IGNORECASE
-    )
-
-    def parse_filename(self, filename: str):
-
-        if not self.FILENAME_PATTERN.match(filename):
-            return None
-
-        # remove extension
-        name = Path(filename).stem
-
-        # split
-        parts = name.split("_")
-
-        # 1__M_Left_thumb_finger
-        # ['1', '', 'M', 'Left', 'thumb', 'finger']
-
-        external_id = int(parts[0])
-
-        sex = parts[2]
-
-        hand = parts[3].lower()
-
-        finger = parts[4].lower()
-
-        return {
-            "external_id": external_id,
-            "sex": sex,
-            "hand": hand,
-            "finger": finger
-        }
 
 
     def load_subjects(self, csv_path: str):
@@ -74,7 +39,7 @@ class ImportService:
             filename = file_path.name
 
             # validate filename
-            meta = self.parse_filename(filename)
+            meta = parse_filename(filename)
 
             if meta is None:
                 print(f"[SKIP] invalid filename: {filename}")

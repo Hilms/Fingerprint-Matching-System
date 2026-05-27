@@ -25,7 +25,8 @@ class SubjectService:
                     age,
                     address,
                     city,
-                    country
+                    country,
+                    has_fingerprint
                 )
                 VALUES (
                     :external_id,
@@ -33,7 +34,8 @@ class SubjectService:
                     :age,
                     :address,
                     :city,
-                    :country
+                    :country,
+                    TRUE
                 )
                 RETURNING *
             """
