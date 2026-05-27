@@ -125,7 +125,7 @@ class FingerprintService:
 
                 activate_query = """
                     UPDATE subjects
-                    SET active = TRUE
+                    SET has_fingerprints = TRUE
                     WHERE id = :subject_id
                 """
 
