@@ -8,61 +8,106 @@ router = APIRouter(
     tags=["auth"]
 )
 
-fake_users = {}
-
 class RegisterRequest(BaseModel):
+    first_name: str
+    last_name: str
     username: str
+    email: str
     password: str
+
 
 class LoginRequest(BaseModel):
     username: str
     password: str
 
-@router.post("/register")
-def register(data: RegisterRequest):
 
-    # check if user exist
-    if data.username in fake_users:
+@router.post("/register")
+async def register(data: RegisterRequest):
+
+    existing = await user_service.get_user(
+        data.username
+    )
+
+    if existing:
 
         raise HTTPException(
-            status_code=400,
-            detail="User already exists"
+            status_code=409,
+            detail="user already exists"
         )
 
-    # store user
-    fake_users[data.username] = {
+    password_hash = hash_password(
+        data.password
+    )
 
-        "username": data.username,
+    query = """
+        INSERT INTO users (
+            first_name,
+            last_name,
+            username,
+            email,
+            password_hash
+        )
+        VALUES (
+            :username,
+            :email,
+            :first_name,
+            :last_name,
+            :password_hash
+        )
+    """
 
-        # store hashed pw
-        "password": hash_password(data.password),
-
-        "role": "user"
-    }
+    await user_service.db.execute(
+        query=query,
+        values={
+            "username": data.username,
+            "email": data.email,
+            "first_name": data.first_name,
+            "last_name": data.last_name,
+            "password_hash": password_hash
+        }
+    )
 
     return {
-        "message": "User created"
+        "message": "user created"
     }
 
-@router.post("/login")
-def login(data: LoginRequest):
 
-    user = fake_users.get(data.username)
+@router.post("/login")
+async def login(data: LoginRequest):
+
+    user = await user_service.get_user_with_password(
+        data.username
+    )
 
     if not user:
-        return {
-            "error": "wrong username"
-        }
 
-    if not verify_password(data.password, user["password"]):
-        return {
-            "error": "wrong password"
-        }
+        raise HTTPException(
+            status_code=401,
+            detail="wrong username"
+        )
 
-    # create jwt token
+    if not user["is_active"]:
+
+        raise HTTPException(
+            status_code=403,
+            detail="user deactivated"
+        )
+
+    valid_password = verify_password(
+        data.password,
+        user["password_hash"]
+    )
+
+    if not valid_password:
+
+        raise HTTPException(
+            status_code=401,
+            detail="wrong password"
+        )
+
     token = create_access_token({
-        "sub": data.username,
-        "role": data.role
+        "sub": user["username"],
+        "role": user["role"]
     })
 
     return {
@@ -70,13 +115,9 @@ def login(data: LoginRequest):
         "token_type": "bearer"
     }
 
-@router.get("/me")
-def me(user = Depends(get_current_user)):
-    return user
 
-@router.post("/upload")
-def upload(
-    user = Depends(get_current_user),
-    _ = Depends(require_role("admin"))
+@router.get("/me")
+async def me(
+    user=Depends(get_current_user)
 ):
-    return {"message": "admin upload ok"}
+    return user

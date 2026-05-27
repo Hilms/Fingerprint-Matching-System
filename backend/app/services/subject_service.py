@@ -8,52 +8,52 @@ class SubjectService:
     # CREATE
     async def create_subject(self, data: dict):
 
-            # check if subject already exists
-            existing = await self.get_subject_by_ref_id(
-                data["external_id"]
+        # check if subject already exists
+        existing = await self.get_subject_by_ref_id(
+            data["external_id"]
+        )
+
+        if existing:
+            raise HTTPException(
+                status_code=409,
+                detail="subject already exists"
             )
 
-            if existing:
-                raise HTTPException(
-                    status_code=409,
-                    detail="subject already exists"
-                )
-
-            query = """
-                INSERT INTO subjects (
-                    external_id,
-                    name,
-                    age,
-                    address,
-                    city,
-                    country,
-                    has_fingerprint
-                )
-                VALUES (
-                    :external_id,
-                    :name,
-                    :age,
-                    :address,
-                    :city,
-                    :country,
-                    TRUE
-                )
-                RETURNING *
-            """
-
-            subject = await self.db.fetch_one(
-                query=query,
-                values={
-                    "external_id": data["external_id"],
-                    "name": data["name"],
-                    "age": data["age"],
-                    "address": data["address"],
-                    "city": data["city"],
-                    "country": data["country"]
-                }
+        query = """
+            INSERT INTO subjects (
+                external_id,
+                name,
+                age,
+                address,
+                city,
+                country,
+                has_fingerprint
             )
+            VALUES (
+                :external_id,
+                :name,
+                :age,
+                :address,
+                :city,
+                :country,
+                TRUE
+            )
+            RETURNING *
+        """
 
-            return dict(subject)
+        subject = await self.db.fetch_one(
+            query=query,
+            values={
+                "external_id": data["external_id"],
+                "name": data["name"],
+                "age": data["age"],
+                "address": data["address"],
+                "city": data["city"],
+                "country": data["country"]
+            }
+        )
+
+        return dict(subject)
 
     # DELETE
     async def delete_subject(

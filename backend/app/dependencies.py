@@ -4,8 +4,11 @@ from app.services.subject_service import SubjectService
 from app.services.fingerprint_service import FingerprintService
 from app.services.storage_service import StorageService
 from app.services.import_service import ImportService
+from app.services.user_service import UserService
 
 # shared service instances
+
+user_service = UserService(database)
 
 storage_service = StorageService()
 
