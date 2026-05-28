@@ -12,6 +12,7 @@ class FingerprintService:
         storage_service,
         subject_service,
         fingerprint_embedder,
+        fingerprint_minutiae_matcher,
         embedding_method="correlation"
     ):
 
@@ -20,6 +21,7 @@ class FingerprintService:
         self.subject_service = subject_service
         self.fingerprint_embedder = fingerprint_embedder
         self.embedding_method = embedding_method
+        self.fingerprint_minutiae_matcher = fingerprint_minutiae_matcher
 
 
     def load_image(self, source):
@@ -467,3 +469,151 @@ class FingerprintService:
             return result
 
         return None
+
+
+
+    async def match_fingerprint(
+        self,
+        file,
+        k: int = 10
+    ):
+
+        # load uploaded fingerprint image
+        # create retrieval embedding
+        #
+        # this embedding is used only for:
+        # pgvector similarity retrieval
+
+        embedding = self.create_embedding(query_image)
+
+        # search nearest fingerprint candidates
+
+        query = """
+            SELECT
+                id,
+                subject_id,
+                image_url,
+                filename,
+
+                feature_vector <=> :embedding
+                    AS distance
+
+            FROM fingerprints
+
+            ORDER BY distance ASC
+
+            LIMIT :k
+        """
+
+        candidates = await self.db.fetch_all(
+            query=query,
+            values={
+                "embedding": embedding,
+                "k": k
+            }
+        )
+
+        if not candidates:
+            return []
+
+        # download candidate images
+
+        candidate_images = []
+
+        for candidate in candidates:
+
+            candidate = dict(candidate)
+
+            try:
+
+                # retrieve image bytes from storage
+
+                image_bytes = (
+                    self.storage_service.download_image(
+                        candidate["image_url"]
+                    )
+                )
+
+                # convert bytes -> opencv image
+
+                image_array = np.frombuffer(
+                    image_bytes,
+                    np.uint8
+                )
+
+                candidate_image = cv2.imdecode(
+                    image_array,
+                    cv2.IMREAD_GRAYSCALE
+                )
+
+                if candidate_image is None:
+                    continue
+
+                candidate_images.append({
+
+                    "id": candidate["id"],
+
+                    "image": candidate_image
+                })
+
+            except Exception:
+                continue
+
+        # minutiae verification
+
+        results = self.fingerprint_minutiae_matcher.match_candidates(query_image,candidate_images)
+
+        # enrich results with:
+        #   fingerprint metadata
+        #   subject information
+
+        enriched_results = []
+
+        for result in results:
+
+            fingerprint_metadata = (
+                await self.get_fingerprint_metadata(
+                    result["candidate_id"]
+                )
+            )
+
+            subject = (
+                await self.get_fingerprint_subject(
+                    result["candidate_id"]
+                )
+            )
+
+            enriched_results.append({
+
+                # fingerprint info
+
+                "fingerprint":
+                    fingerprint_metadata,
+
+                # subject info
+
+                "subject":
+                    subject,
+
+                # matching metrics
+
+                "accuracy":
+                    result["accuracy"],
+
+                "total_matches":
+                    result["total_matches"],
+
+                "query_minutiae_count":
+                    result["query_minutiae_count"],
+
+                "candidate_minutiae_count":
+                    result["candidate_minutiae_count"],
+
+                # geometric correspondences
+                # used later for drawing matches
+
+                "matched_points":
+                    result["matched_points"]
+            })
+
+        return enriched_results

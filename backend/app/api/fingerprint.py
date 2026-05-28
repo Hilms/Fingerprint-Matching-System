@@ -101,3 +101,23 @@ async def delete_fingerprint(
     return await fingerprint_service.delete_fingerprint(
         fingerprint_id
     )
+
+
+# MATCHING
+@router.get("/match")
+async def match_fingerprint(
+    file: UploadFile = File(...),
+    user=Depends(get_current_user)
+):
+
+    if file.content_type not in ALLOWED_TYPES:
+
+        raise HTTPException(
+            status_code=400,
+            detail="File must be an image"
+        )
+
+    return await fingerprint_service.match_fingerprint(
+       file
+    )
+
