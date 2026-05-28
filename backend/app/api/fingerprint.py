@@ -11,6 +11,11 @@ router = APIRouter(
     tags=["fingerprints"]
 )
 
+ALLOWED_TYPES = [
+        "image/png",
+        "image/jpeg",
+        "image/jpg",
+        "image/bmp"]
 
 class FingerprintCreate(BaseModel):
     subject_id: int
@@ -28,6 +33,14 @@ async def upload_fingerprint(
     user=Depends(get_current_user),
     _=Depends(require_role("admin"))
 ):
+
+    if file.content_type not in ALLOWED_TYPES:
+
+        raise HTTPException(
+            status_code=400,
+            detail="File must be an image"
+        )
+
     return await fingerprint_service.upload_fingerprint(
         file,
         subject_id,
