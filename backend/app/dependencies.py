@@ -6,8 +6,8 @@ from app.services.storage_service import StorageService
 from app.services.import_service import ImportService
 from app.services.user_service import UserService
 
-from app.utils.fingerprint_embedder import FingerprintEmbedder
-from app.utils.fingerprint_minutiae_matcher import FingerprintMinutiaeMatcher
+from app.matching.fingerprint_embedder import FingerprintEmbedder
+from app.matching.fingerprint_minutiae_matcher import FingerprintMinutiaeMatcher
 
 # shared service instances
 
