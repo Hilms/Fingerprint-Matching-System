@@ -3,7 +3,6 @@ import cv2
 import numpy as np
 
 from app.utils.fingerprint_parser import FingerprintParser
-from app.utils.fingerprint_embedder import FingerprintEmbedder
 
 class FingerprintService:
 
@@ -12,12 +11,16 @@ class FingerprintService:
         database,
         storage_service,
         subject_service,
+        fingerprint_embedder,
         embedding_method="correlation"
     ):
+
         self.db = database
         self.storage_service = storage_service
         self.subject_service = subject_service
+        self.fingerprint_embedder = fingerprint_embedder
         self.embedding_method = embedding_method
+
 
     def load_image(self, source):
 
@@ -49,7 +52,15 @@ class FingerprintService:
 
     def create_embedding(self, source):
         image = self.load_image(source)
-        return FingerprintEmbedder.extract_embedding(image, self.method)
+
+        if image is None:
+
+            raise HTTPException(
+                status_code=400,
+                detail="invalid fingerprint image"
+            )
+
+        return self.fingerprint_embedder.extract_embedding(image, self.embedding_method)
 
 
     # UPLOAD
@@ -420,6 +431,7 @@ class FingerprintService:
             )
 
         return dict(subject)
+
 
     async def find_duplicate_fingerprint(
         self,
