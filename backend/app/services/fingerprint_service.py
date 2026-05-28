@@ -11,11 +11,13 @@ class FingerprintService:
         self,
         database,
         storage_service,
-        subject_service
+        subject_service,
+        embedding_method="correlation"
     ):
         self.db = database
         self.storage_service = storage_service
         self.subject_service = subject_service
+        self.embedding_method = embedding_method
 
     def load_image(self, source):
 
@@ -47,7 +49,7 @@ class FingerprintService:
 
     def create_embedding(self, source):
         image = self.load_image(source)
-        return FingerprintEmbedder.extract_embedding(image)
+        return FingerprintEmbedder.extract_embedding(image, self.method)
 
 
     # UPLOAD
@@ -110,7 +112,7 @@ class FingerprintService:
                 )
             )
 
-        embedding = self.embedder.extract_embedding(file)
+        embedding = self.create_embedding(file)
 
         # check duplicate fingerprints
 
