@@ -42,13 +42,13 @@ class FingerprintEmbedder:
             return self.default_embedder(image)
 
         if embedding_method == "correlation":
-            return self.correlation_embedder(processed)
+            return self.correlation_embedder(image)
 
         elif embedding_method == "minutiae":
-            return self.minutiae_embedder(processed)
+            return self.minutiae_embedder(image)
 
         elif embedding_method == "ridge":
-            return self.ridge_embedder(processed)
+            return self.ridge_embedder(image)
 
         else:
             raise ValueError(f"Unknown method: {method}")

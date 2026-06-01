@@ -24,7 +24,7 @@ class FingerprintParser:
 
         external_id = int(parts[0])
 
-        sex = parts[2]
+        sex = parts[2].lower()
 
         hand = parts[3].lower()
 

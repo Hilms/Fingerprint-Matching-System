@@ -62,7 +62,9 @@ class FingerprintService:
                 detail="invalid fingerprint image"
             )
 
-        return self.fingerprint_embedder.extract_embedding(image, self.embedding_method)
+        vec = self.fingerprint_embedder.extract_embedding(image, self.embedding_method)
+
+        return "[" + ",".join(str(x) for x in vec) + "]" # pgvector format
 
 
     # UPLOAD
@@ -78,7 +80,9 @@ class FingerprintService:
 
         filename = file.filename
 
-        meta = FingerprintParser.parse_filename(filename)
+        fingerprint_parser = FingerprintParser()
+
+        meta = fingerprint_parser.parse_filename(filename)
 
         if meta is None:
 
@@ -143,15 +147,13 @@ class FingerprintService:
                 )
             )
 
-        uploaded_image_path = f"fingerprints/{filename}"
-
         try:
 
             # upload image to storage
 
             image_url = self.storage_service.upload_image(
                 file=file,
-                object_path=uploaded_image_path
+                object_path=filename
             )
 
             # DB transaction
@@ -224,7 +226,7 @@ class FingerprintService:
 
         query = """
             INSERT INTO fingerprints (
-                subject_id,
+                subject_external_id,
                 image_url,
                 sex,
                 hand,
@@ -233,7 +235,7 @@ class FingerprintService:
                 feature_vector
             )
             VALUES (
-                :subject_id,
+                :subject_external_id,
                 :image_url,
                 :sex,
                 :hand,
@@ -247,7 +249,7 @@ class FingerprintService:
         fingerprint = await self.db.fetch_one(
             query=query,
             values={
-                "subject_id": data["subject_id"],
+                "subject_external_id": data["subject_external_id"],
                 "image_url": data["image_url"],
                 "sex": data["sex"],
                 "hand": data["hand"],

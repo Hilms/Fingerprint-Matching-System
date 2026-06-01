@@ -24,10 +24,7 @@ class StorageService:
             content_type="application/octet-stream"
         )
 
-        return {
-            "message": "image uploaded",
-            "path": object_path
-        }
+        return object_path
 
     # DELETE
     def delete_image(self, object_path: str):

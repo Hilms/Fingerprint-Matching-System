@@ -11,12 +11,10 @@ SUBJECTS_CSV_PATH = os.getenv("IMPORT_SUBJECTS_CSV_PATH")
 FINGERPRINTS_DIR_PATH = os.getenv("IMPORT_FINGERPRINTS_DIR_PATH")
 
 
-@router.post("/dataset")
+@router.post("/admin/dataset")
 async def import_data(
-    user=Depends(get_current_user),
     _=Depends(require_role("admin"))
 ):
-
     return await import_service.import_data(
         subjects_csv=SUBJECTS_CSV_PATH,
         fingerprints_dir=FINGERPRINTS_DIR_PATH

@@ -9,7 +9,7 @@ class SubjectService:
     async def create_subject(self, data: dict):
 
         # check if subject already exists
-        existing = await self.get_subject_by_ref_id(
+        existing = await self.get_subject_by_external_id(
             data["external_id"]
         )
 
@@ -22,21 +22,25 @@ class SubjectService:
         query = """
             INSERT INTO subjects (
                 external_id,
-                name,
+                first_name,
+                last_name,
                 age,
                 address,
                 city,
                 country,
-                has_fingerprint
+                phone_number,
+                has_fingerprints
             )
             VALUES (
                 :external_id,
-                :name,
+                :first_name,
+                :last_name,
                 :age,
                 :address,
                 :city,
                 :country,
-                TRUE
+                :phone_number,
+                :has_fingerprints
             )
             RETURNING *
         """
@@ -44,12 +48,15 @@ class SubjectService:
         subject = await self.db.fetch_one(
             query=query,
             values={
-                "external_id": data["external_id"],
-                "name": data["name"],
-                "age": data["age"],
+                "external_id": int(data["external_id"]),
+                "first_name": data["first_name"],
+                "last_name": data["last_name"],
+                "age": int(data["age"]),
                 "address": data["address"],
                 "city": data["city"],
-                "country": data["country"]
+                "country": data["country"],
+                "phone_number": data["phone_number"],
+                "has_fingerprints": data["has_fingerprints"]
             }
         )
 
@@ -234,3 +241,25 @@ class SubjectService:
         return {
             "message": f"subject {subject_id} updated"
         }
+
+    async def get_subject_by_external_id(
+        self,
+        external_id: int
+    ):
+        query = """
+            SELECT *
+            FROM subjects
+            WHERE external_id = :external_id
+        """
+
+        subject = await self.db.fetch_one(
+            query=query,
+            values={
+                "external_id": external_id
+            }
+        )
+
+        if not subject:
+            return None
+
+        return external_id
