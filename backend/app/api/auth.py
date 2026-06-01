@@ -28,47 +28,16 @@ class LoginRequest(BaseModel):
 async def register(data: RegisterRequest):
 
     existing = await user_service.get_user(
-        data.username
+            data.username
     )
 
     if existing:
-
         raise HTTPException(
             status_code=409,
             detail="user already exists"
         )
 
-    password_hash = hash_password(
-        data.password
-    )
-
-    query = """
-        INSERT INTO users (
-            first_name,
-            last_name,
-            username,
-            email,
-            password_hash
-        )
-        VALUES (
-            :username,
-            :email,
-            :first_name,
-            :last_name,
-            :password_hash
-        )
-    """
-
-    await user_service.db.execute(
-        query=query,
-        values={
-            "username": data.username,
-            "email": data.email,
-            "first_name": data.first_name,
-            "last_name": data.last_name,
-            "password_hash": password_hash
-        }
-    )
+    await user_service.create_user(data)
 
     return {
         "message": "user created"

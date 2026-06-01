@@ -1,6 +1,9 @@
 from fastapi import FastAPI
+import os
+
 from app.db.database import database
 from app.storage.minio_client import init_minio
+
 from app.api.health import router as health_router
 from app.api.test import router as test_router
 from app.api.auth import router as auth_router
@@ -9,12 +12,25 @@ from app.api.subject import router as subject_router
 from app.api.import_data import router as import_router
 from app.api.fingerprint import router as fingerprint_router
 
+from app.dependencies import user_service
+
 app = FastAPI()
 
 @app.on_event("startup")
 async def startup():
     await database.connect()
     init_minio()
+
+    admin = await user_service.get_user("admin")
+    if not admin:
+        await user_service.create_admin({
+            "first_name": "admin",
+            "last_name": "admin",
+            "username": "admin",
+            "email": "admin@example.de",
+            "password": os.getenv("ADMIN_PASSWORD"),
+            "role" : "admin"
+        })
 
 @app.on_event("shutdown")
 async def shutdown():

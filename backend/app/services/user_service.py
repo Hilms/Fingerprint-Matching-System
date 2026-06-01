@@ -12,6 +12,85 @@ class UserService:
     def __init__(self, database):
         self.db = database
 
+    # CREATE ADMIN
+    async def create_admin(
+        self,
+        data: dict
+    ):
+
+        password_hash = hash_password(
+            data["password"]
+        )
+
+        query = """
+            INSERT INTO users (
+                first_name,
+                last_name,
+                username,
+                email,
+                password_hash,
+                role
+            )
+            VALUES (
+                :first_name,
+                :last_name,
+                :username,
+                :email,
+                :password_hash,
+                :role
+            )
+        """
+
+        await self.db.execute(
+            query=query,
+            values={
+                "first_name": data["first_name"],
+                "last_name": data["last_name"],
+                "username": data["username"],
+                "email": data["email"],
+                "password_hash": password_hash,
+                "role" : data["role"]
+            }
+        )
+
+    # CREATE USER
+    async def create_user(
+        self,
+        data
+    ):
+        password_hash = hash_password(
+                data.password
+        )
+
+        query = """
+            INSERT INTO users (
+                first_name,
+                last_name,
+                username,
+                email,
+                password_hash
+            )
+            VALUES (
+                :first_name,
+                :last_name,
+                :username,
+                :email,
+                :password_hash
+            )
+        """
+
+        await self.db.execute(
+            query=query,
+            values={
+                "username": data.username,
+                "email": data.email,
+                "first_name": data.first_name,
+                "last_name": data.last_name,
+                "password_hash": password_hash
+            }
+        )
+
+
     # GET USER
     async def get_user(
         self,
