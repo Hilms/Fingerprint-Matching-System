@@ -1,11 +1,6 @@
 from fastapi import HTTPException
 
-from passlib.context import CryptContext
-
-pwd_context = CryptContext(
-    schemes=["bcrypt"],
-    deprecated="auto"
-)
+from app.security.auth import hash_password, verify_password
 
 class UserService:
 
@@ -299,7 +294,7 @@ class UserService:
 
         # verify current password
 
-        valid_password = pwd_context.verify(
+        valid_password = verify_password(
             current_password,
             user["password_hash"]
         )
@@ -313,7 +308,7 @@ class UserService:
 
         # hash new password
 
-        new_password_hash = pwd_context.hash(
+        new_password_hash = hash_password(
             new_password
         )
 
@@ -335,6 +330,7 @@ class UserService:
             "message": "password updated"
         }
 
+
     async def admin_reset_password(
         self,
         username: str,
@@ -352,7 +348,7 @@ class UserService:
                 detail="user not found"
             )
 
-        new_password_hash = pwd_context.hash(
+        new_password_hash = hash_password(
             new_password
         )
 
