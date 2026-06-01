@@ -1,7 +1,10 @@
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
+
 from app.security.auth import hash_password, verify_password, create_access_token, get_current_user
 from app.security.permission import require_role
+
+from app.dependencies import user_service
 
 router = APIRouter(
     prefix="/auth",

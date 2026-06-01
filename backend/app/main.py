@@ -7,6 +7,7 @@ from app.api.auth import router as auth_router
 from app.api.user import router as user_router
 from app.api.subject import router as subject_router
 from app.api.import_data import router as import_router
+from app.api.fingerprint import router as fingerprint_router
 
 app = FastAPI()
 
@@ -29,3 +30,4 @@ app.include_router(auth_router)
 app.include_router(user_router)
 app.include_router(subject_router)
 app.include_router(import_router)
+app.include_router(fingerprint_router)
