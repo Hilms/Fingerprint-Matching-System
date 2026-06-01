@@ -87,6 +87,11 @@ async def login(data: LoginRequest):
         "token_type": "bearer"
     }
 
+@router.post("/logout")
+async def logout():
+    return {
+        "message": "logout successful"
+    }
 
 @router.get("/me")
 async def me(

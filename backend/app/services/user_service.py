@@ -7,12 +7,14 @@ class UserService:
     def __init__(self, database):
         self.db = database
 
-    # CREATE ADMIN
+    # =========================
+    # CREATE
+    # =========================
+
     async def create_admin(
         self,
         data: dict
     ):
-
         password_hash = hash_password(
             data["password"]
         )
@@ -44,17 +46,16 @@ class UserService:
                 "username": data["username"],
                 "email": data["email"],
                 "password_hash": password_hash,
-                "role" : data["role"]
+                "role": data["role"]
             }
         )
 
-    # CREATE USER
     async def create_user(
         self,
         data
     ):
         password_hash = hash_password(
-                data.password
+            data.password
         )
 
         query = """
@@ -77,21 +78,22 @@ class UserService:
         await self.db.execute(
             query=query,
             values={
-                "username": data.username,
-                "email": data.email,
                 "first_name": data.first_name,
                 "last_name": data.last_name,
+                "username": data.username,
+                "email": data.email,
                 "password_hash": password_hash
             }
         )
 
+    # =========================
+    # GET
+    # =========================
 
-    # GET USER
     async def get_user(
         self,
         username: str
     ):
-
         query = """
             SELECT
                 id,
@@ -113,19 +115,12 @@ class UserService:
             }
         )
 
-        if not user:
-            return None
+        return dict(user) if user else None
 
-        return dict(user)
-
-    # GET USER
     async def get_user_with_password(
         self,
         username: str
     ):
-
-        # used internally for auth/login
-
         query = """
             SELECT *
             FROM users
@@ -139,29 +134,36 @@ class UserService:
             }
         )
 
-        if not user:
-            return None
+        return dict(user) if user else None
 
-        return dict(user)
-
+    # =========================
     # SEARCH
-    async def search_user(
+    # =========================
+
+    async def search_users(
         self,
         query: str
     ):
-
-        search_query = """
+        sql = """
             SELECT
-                *
+                id,
+                first_name,
+                last_name,
+                username,
+                email,
+                role,
+                is_active,
+                created_at
             FROM users
             WHERE
                 first_name ILIKE :query
                 OR last_name ILIKE :query
                 OR username ILIKE :query
+                OR email ILIKE :query
         """
 
         users = await self.db.fetch_all(
-            query=search_query,
+            query=sql,
             values={
                 "query": f"%{query}%"
             }
@@ -172,157 +174,109 @@ class UserService:
             for user in users
         ]
 
-    # DELETE
-    async def delete_user(
-        self,
-        username: str
-    ):
-
-        existing = await self.get_user(username)
-
-        if not existing:
-
-            raise HTTPException(
-                status_code=404,
-                detail="user not found"
-            )
-
-        query = """
-            DELETE FROM users
-            WHERE username = :username
-        """
-
-        await self.db.execute(
-            query=query,
-            values={
-                "username": username
-            }
-        )
-
-        return {
-            "message": f"{username} deleted"
-        }
-
+    # =========================
     # UPDATE
+    # =========================
+
     async def update_user(
         self,
         username: str,
         data: dict
     ):
-
-        existing = await self.get_user(username)
+        existing = await self.get_user(
+            username
+        )
 
         if not existing:
-
             raise HTTPException(
                 status_code=404,
                 detail="user not found"
             )
 
-        # remove fields that were not sent
-
         update_data = {
-            key: value
-            for key, value in data.items()
-            if value is not None
+            k: v
+            for k, v in data.items()
+            if v is not None
         }
 
-        # nothing to update
-
         if not update_data:
-
             raise HTTPException(
                 status_code=400,
-                detail="no fields to update"
+                detail="nothing to update"
             )
 
-        # build dynamic query
+        fields = [
+            f"{key} = :{key}"
+            for key in update_data.keys()
+        ]
 
-        fields = []
-
-        for key in update_data.keys():
-            fields.append(f"{key} = :{key}")
-
-        query = f"""
+        sql = f"""
             UPDATE users
             SET {", ".join(fields)}
-            WHERE username = :username
+            WHERE username = :current_username
         """
 
-        # add username to values
+        update_data["current_username"] = username
 
-        update_data["username"] = username
-
-        await self.db.execute(
-            query=query,
-            values=update_data
-        )
+        try:
+            await self.db.execute(
+                query=sql,
+                values=update_data
+            )
+        except Exception:
+            raise HTTPException(
+                status_code=409,
+                detail="username or email already exists"
+            )
 
         return {
             "message": f"{username} updated"
         }
 
-    # UPDATE
+    # =========================
+    # PASSWORD
+    # =========================
+
     async def update_password(
         self,
         username: str,
         current_password: str,
         new_password: str
     ):
-
-        query = """
-            SELECT *
-            FROM users
-            WHERE username = :username
-        """
-
-        user = await self.db.fetch_one(
-            query=query,
-            values={
-                "username": username
-            }
+        user = await self.get_user_with_password(
+            username
         )
 
         if not user:
-
             raise HTTPException(
                 status_code=404,
                 detail="user not found"
             )
 
-        user = dict(user)
-
-        # verify current password
-
-        valid_password = verify_password(
+        if not verify_password(
             current_password,
             user["password_hash"]
-        )
-
-        if not valid_password:
-
+        ):
             raise HTTPException(
                 status_code=401,
                 detail="invalid password"
             )
 
-        # hash new password
-
-        new_password_hash = hash_password(
+        password_hash = hash_password(
             new_password
         )
 
-        update_query = """
+        sql = """
             UPDATE users
             SET password_hash = :password_hash
             WHERE username = :username
         """
 
         await self.db.execute(
-            query=update_query,
+            query=sql,
             values={
                 "username": username,
-                "password_hash": new_password_hash
+                "password_hash": password_hash
             }
         )
 
@@ -330,42 +284,79 @@ class UserService:
             "message": "password updated"
         }
 
-
     async def admin_reset_password(
         self,
         username: str,
         new_password: str
     ):
-
-        existing = await self.get_user(
+        user = await self.get_user(
             username
         )
 
-        if not existing:
-
+        if not user:
             raise HTTPException(
                 status_code=404,
                 detail="user not found"
             )
 
-        new_password_hash = hash_password(
+        password_hash = hash_password(
             new_password
         )
 
-        query = """
+        sql = """
             UPDATE users
             SET password_hash = :password_hash
             WHERE username = :username
         """
 
         await self.db.execute(
-            query=query,
+            query=sql,
             values={
                 "username": username,
-                "password_hash": new_password_hash
+                "password_hash": password_hash
             }
         )
 
         return {
             "message": f"{username} password reset"
+        }
+
+    # =========================
+    # DELETE
+    # =========================
+
+    async def delete_user(
+        self,
+        username: str
+    ):
+        user = await self.get_user(
+            username
+        )
+
+        if not user:
+            raise HTTPException(
+                status_code=404,
+                detail="user not found"
+            )
+
+        if user["role"] == "admin":
+            raise HTTPException(
+                status_code=403,
+                detail="admin users cannot be deleted"
+            )
+
+        sql = """
+            DELETE FROM users
+            WHERE username = :username
+        """
+
+        await self.db.execute(
+            query=sql,
+            values={
+                "username": username
+            }
+        )
+
+        return {
+            "message": f"{username} deleted"
         }
