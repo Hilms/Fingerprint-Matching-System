@@ -1,5 +1,3 @@
-from typing import Optional
-
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
@@ -13,19 +11,19 @@ router = APIRouter(
 )
 
 class SelfUserUpdate(BaseModel):
-    # username: Optional[str] = None
-    email: Optional[str] = None
-    first_name: Optional[str] = None
-    last_name: Optional[str] = None
+    # username: str | None = None
+    email: str | None = None
+    first_name: str | None = None
+    last_name: str | None = None
 
 
 class AdminUserUpdate(BaseModel):
-    # username: Optional[str] = None
-    email: Optional[str] = None
-    first_name: Optional[str] = None
-    last_name: Optional[str] = None
-    role: Optional[str] = None
-    is_active: Optional[bool] = None
+    # username: str | None = None
+    email: str | None = None
+    first_name: str | None = None
+    last_name: str | None = None
+    role: str | None = None
+    is_active: bool | None = None
 
 
 class PasswordUpdate(BaseModel):

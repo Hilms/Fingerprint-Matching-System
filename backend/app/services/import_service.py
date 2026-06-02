@@ -94,11 +94,12 @@ class ImportService:
                 async with self.db.transaction():
 
                     # SUBJECT
-                    subject_ex_id = await self.subject_service.get_subject_by_external_id(
+                    # check if subject already exists
+                    existing = await self.subject_exists_by_external_id(
                         external_id
                     )
 
-                    if subject_ex_id is None:
+                    if not existing:
 
                         await self.subject_service.create_subject({
                             "external_id": external_id,

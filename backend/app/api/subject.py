@@ -6,72 +6,80 @@ from app.security.permission import require_role
 
 from app.dependencies import subject_service
 
-
 router = APIRouter(
     prefix="/subjects",
     tags=["subjects"]
 )
 
-
 class SubjectCreate(BaseModel):
-    ref_id: str
-    name: str
-    age: int
-    address: str
-    city: str
-    country: str
+    external_id: int
+    first_name: str | None = None
+    last_name: str | None = None
+    age: int | None = None
+    address: str | None = None
+    city: str | None = None
+    country: str | None = None
+    phone_number: str | None = None
+    has_fingerprints: bool | None = None
 
 
 class SubjectUpdate(BaseModel):
-    name: str
-    age: int
-    address: str
-    city: str
-    country: str
+    first_name: str | None = None
+    last_name: str | None = None
+    age: int | None = None
+    address: str | None = None
+    city: str | None = None
+    country: str | None = None
+    phone_number: str | None = None
+    has_fingerprints: bool | None = None
 
 
-@router.post("/")
-async def create_subject(
-    data: SubjectCreate,
-    user=Depends(get_current_user),
-    _=Depends(require_role("admin"))
-):
-    return await subject_service.create_subject(data.dict())
+# PUBLIC ROUTES
 
-
-@router.get("/search/")
+@router.get("/search")
 async def search_subjects(
     q: str,
     user=Depends(get_current_user)
 ):
     return await subject_service.search_subjects(q)
 
-
-@router.get("/{subject_id}")
+@router.get("/{external_id}")
 async def get_subject(
-    subject_id: int,
+    external_id: int,
     user=Depends(get_current_user)
 ):
-    return await subject_service.get_subject(subject_id)
+    return await subject_service.get_subject(external_id)
 
 
-@router.put("/{subject_id}")
+# ADMIN ROUTES
+@router.post("/admin")
+async def create_subject(
+    data: SubjectCreate,
+    user=Depends(get_current_user),
+    _=Depends(require_role("admin"))
+):
+    return await subject_service.create_subject(
+        data.model_dump()
+    )
+
+@router.patch("/admin/{external_id}")
 async def update_subject(
-    subject_id: int,
+    external_id: int,
     data: SubjectUpdate,
     user=Depends(get_current_user),
     _=Depends(require_role("admin"))
 ):
     return await subject_service.update_subject(
-        subject_id,
-        data.dict()
+        external_id,
+        data.model_dump(exclude_none=True)
     )
 
-
-@router.delete("/{subject_id}")
+@router.delete("/admin/{external_id}")
 async def delete_subject(
-    subject_id: int,
+    external_id: int,
     user=Depends(get_current_user),
     _=Depends(require_role("admin"))
 ):
-    return await subject_service.delete_subject(subject_id)
+    return await subject_service.delete_subject(
+        external_id
+    )

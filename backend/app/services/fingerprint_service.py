@@ -4,6 +4,7 @@ import numpy as np
 
 from app.utils.fingerprint_parser import FingerprintParser
 
+
 class FingerprintService:
 
     def __init__(
@@ -26,7 +27,6 @@ class FingerprintService:
 
     def load_image(self, source):
 
-        # UploadFile
         if hasattr(source, "file"):
 
             file_bytes = source.file.read()
@@ -41,18 +41,18 @@ class FingerprintService:
                 cv2.IMREAD_GRAYSCALE
             )
 
-            # reset cursor for later reuse
             source.file.seek(0)
 
             return image
 
-        # local path
         return cv2.imread(
             source,
             cv2.IMREAD_GRAYSCALE
         )
 
+
     def create_embedding(self, source):
+
         image = self.load_image(source)
 
         if image is None:
@@ -62,21 +62,22 @@ class FingerprintService:
                 detail="invalid fingerprint image"
             )
 
-        vec = self.fingerprint_embedder.extract_embedding(image, self.embedding_method)
+        vec = self.fingerprint_embedder.extract_embedding(
+            image,
+            self.embedding_method
+        )
 
-        return "[" + ",".join(str(x) for x in vec) + "]" # pgvector format
+        return "[" + ",".join(str(x) for x in vec) + "]"
 
 
     # UPLOAD
     async def upload_fingerprint(
         self,
-        file, # uploaded file
+        file,
         user,
         subject_id: int = None,
         subject_data: dict = None
     ):
-
-        # validate filename
 
         filename = file.filename
 
@@ -88,23 +89,14 @@ class FingerprintService:
 
             raise HTTPException(
                 status_code=400,
-                detail=(
-                    "invalid filename format. "
-                    "expected: "
-                    "1__M_Left_thumb_finger.BMP"
-                )
+                detail="invalid filename format"
             )
-
-        # create subject OR load existing subject
 
         subject = None
 
-        # existing subject flow
         if subject_id:
 
-            subject = await self.subject_service.get_subject(
-                subject_id
-            )
+            subject = await self.subject_service.get_subject(subject_id)
 
             if not subject:
 
@@ -113,7 +105,6 @@ class FingerprintService:
                     detail="subject not found"
                 )
 
-        # new subject flow
         elif subject_data:
 
             subject = await self.subject_service.create_subject(
@@ -124,9 +115,7 @@ class FingerprintService:
 
             raise HTTPException(
                 status_code=400,
-                detail=(
-                    "subject_id or subject_data required"
-                )
+                detail="subject_id or subject_data required"
             )
 
         embedding = self.create_embedding(file)
@@ -162,14 +151,14 @@ class FingerprintService:
 
                 # create fingerprint entry
 
-                fingerprint = await self.create_fingerprint({
-                    "subject_id": subject["id"],
+                await self.create_fingerprint({
+                    "subject_external_id": subject["external_id"],
                     "image_url": image_url,
                     "sex": meta["sex"],
                     "hand": meta["hand"],
                     "finger": meta["finger"],
                     "filename": filename,
-                    "feature_vector": feature_vector
+                    "feature_vector": embedding
                 })
 
                 # activate subject
@@ -180,13 +169,13 @@ class FingerprintService:
                 activate_query = """
                     UPDATE subjects
                     SET has_fingerprints = TRUE
-                    WHERE id = :subject_id
+                    WHERE external_id = :external_id
                 """
 
                 await self.db.execute(
                     query=activate_query,
                     values={
-                        "subject_id": subject["id"]
+                        "external_id": subject["external_id"]
                     }
                 )
 
@@ -201,11 +190,7 @@ class FingerprintService:
             # rollback storage manually
 
             try:
-
-                self.storage_service.delete_image(
-                    object_path
-                )
-
+                self.storage_service.delete_image(object_path)
             except Exception:
                 pass
 
@@ -219,7 +204,7 @@ class FingerprintService:
     async def create_fingerprint(
         self,
         data: dict,
-        file_path : str
+        file_path: str
     ):
 
         embedding = self.create_embedding(file_path)
@@ -305,13 +290,13 @@ class FingerprintService:
         count_query = """
             SELECT COUNT(*) as count
             FROM fingerprints
-            WHERE subject_id = :subject_id
+            WHERE subject_external_id = :subject_external_id
         """
 
         remaining = await self.db.fetch_one(
             query=count_query,
             values={
-                "subject_id": subject_id
+                "subject_external_id": fingerprint["subject_external_id"]
             }
         )
 
@@ -322,13 +307,13 @@ class FingerprintService:
             update_query = """
                 UPDATE subjects
                 SET has_fingerprints = FALSE
-                WHERE id = :subject_id
+                WHERE external_id = :external_id
             """
 
             await self.db.execute(
                 query=update_query,
                 values={
-                    "subject_id": subject_id
+                    "external_id": fingerprint["subject_external_id"]
                 }
             )
 
@@ -350,20 +335,22 @@ class FingerprintService:
         sql = """
             SELECT
                 f.id,
-                f.subject_id,
+                f.subject_external_id,
                 f.image_url,
                 f.sex,
                 f.hand,
                 f.finger,
                 f.filename,
-                s.name,
+                s.first_name,
+                s.last_name,
                 s.city,
                 s.country
             FROM fingerprints f
             JOIN subjects s
-                ON f.subject_id = s.id
+                ON f.subject_external_id = s.external_id
             WHERE
-                LOWER(s.name) LIKE LOWER(:query)
+                LOWER(s.first_name) LIKE LOWER(:query)
+                OR LOWER(s.last_name) LIKE LOWER(:query)
                 OR LOWER(s.city) LIKE LOWER(:query)
                 OR LOWER(s.country) LIKE LOWER(:query)
                 OR LOWER(f.filename) LIKE LOWER(:query)
@@ -410,21 +397,19 @@ class FingerprintService:
 
     async def get_fingerprint_subject(
         self,
-        fingerprint_id: int
+        subject_external_id: int
     ):
 
         query = """
-            SELECT s.*
-            FROM fingerprints f
-            JOIN subjects s
-                ON f.subject_id = s.id
-            WHERE f.id = :fingerprint_id
+            SELECT *
+            FROM subjects
+            WHERE external_id = :subject_external_id
         """
 
         subject = await self.db.fetch_one(
             query=query,
             values={
-                "fingerprint_id": fingerprint_id
+                "subject_external_id": subject_external_id
             }
         )
 
@@ -446,7 +431,7 @@ class FingerprintService:
         query = """
             SELECT
                 id,
-                subject_id,
+                subject_external_id,
                 filename,
                 feature_vector <=> :embedding AS distance
             FROM fingerprints
@@ -473,7 +458,6 @@ class FingerprintService:
         return None
 
 
-
     async def match_fingerprint(
         self,
         file,
@@ -485,25 +469,18 @@ class FingerprintService:
         #
         # this embedding is used only for:
         # pgvector similarity retrieval
-
-        embedding = self.create_embedding(query_image)
+        embedding = self.create_embedding(file)
 
         # search nearest fingerprint candidates
-
         query = """
             SELECT
                 id,
-                subject_id,
+                subject_external_id,
                 image_url,
                 filename,
-
-                feature_vector <=> :embedding
-                    AS distance
-
+                feature_vector <=> :embedding AS distance
             FROM fingerprints
-
             ORDER BY distance ASC
-
             LIMIT :k
         """
 
@@ -530,14 +507,11 @@ class FingerprintService:
 
                 # retrieve image bytes from storage
 
-                image_bytes = (
-                    self.storage_service.download_image(
-                        candidate["image_url"]
-                    )
+                image_bytes = self.storage_service.download_image(
+                    candidate["image_url"]
                 )
 
                 # convert bytes -> opencv image
-
                 image_array = np.frombuffer(
                     image_bytes,
                     np.uint8
@@ -552,9 +526,8 @@ class FingerprintService:
                     continue
 
                 candidate_images.append({
-
                     "id": candidate["id"],
-
+                    "subject_external_id": candidate["subject_external_id"],
                     "image": candidate_image
                 })
 
@@ -563,59 +536,40 @@ class FingerprintService:
 
         # minutiae verification
 
-        results = self.fingerprint_minutiae_matcher.match_candidates(query_image,candidate_images)
+        results = self.fingerprint_minutiae_matcher.match_candidates(file,candidate_images)
 
         # enrich results with:
-        #   fingerprint metadata
-        #   subject information
+        # fingerprint metadata
+        # subject information
 
         enriched_results = []
 
+        subject_cache = {}
+
         for result in results:
 
-            fingerprint_metadata = (
-                await self.get_fingerprint_metadata(
-                    result["candidate_id"]
-                )
+            fingerprint_metadata = await self.get_fingerprint_metadata(
+                result["candidate_id"]
             )
 
-            subject = (
-                await self.get_fingerprint_subject(
-                    result["candidate_id"]
+            subject_external_id = result["subject_external_id"]
+
+            # CACHE SUBJECT LOOKUP (avoid repeated DB calls)
+            if subject_external_id not in subject_cache:
+                subject_cache[subject_external_id] = await self.get_fingerprint_subject(
+                    subject_external_id
                 )
-            )
+
+            subject = subject_cache[subject_external_id]
 
             enriched_results.append({
-
-                # fingerprint info
-
-                "fingerprint":
-                    fingerprint_metadata,
-
-                # subject info
-
-                "subject":
-                    subject,
-
-                # matching metrics
-
-                "accuracy":
-                    result["accuracy"],
-
-                "total_matches":
-                    result["total_matches"],
-
-                "query_minutiae_count":
-                    result["query_minutiae_count"],
-
-                "candidate_minutiae_count":
-                    result["candidate_minutiae_count"],
-
-                # geometric correspondences
-                # used later for drawing matches
-
-                "matched_points":
-                    result["matched_points"]
+                "fingerprint": fingerprint_metadata,
+                "subject": subject,
+                "accuracy": result["accuracy"],
+                "total_matches": result["total_matches"],
+                "query_minutiae_count": result["query_minutiae_count"],
+                "candidate_minutiae_count": result["candidate_minutiae_count"],
+                "matched_points": result["matched_points"]
             })
 
         return enriched_results
