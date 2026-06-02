@@ -1,85 +1,49 @@
-import os
 from fastapi import FastAPI
-from databases import Database
-from minio import Minio
-from minio.error import S3Error
+import os
 
-# ---------------------------
-# ENV VARIABLES
-# ---------------------------
-DATABASE_URL = os.getenv("DATABASE_URL")
+from app.db.database import database
+from app.storage.minio_client import init_minio
 
-MINIO_ENDPOINT = os.getenv("MINIO_ENDPOINT", "minio:9000")
-MINIO_ACCESS_KEY = os.getenv("MINIO_ACCESS_KEY", "minioadmin")
-MINIO_SECRET_KEY = os.getenv("MINIO_SECRET_KEY", "minioadmin123")
-MINIO_BUCKET = os.getenv("MINIO_BUCKET", "fingerprints")
+from app.api.health import router as health_router
+from app.api.test import router as test_router
+from app.api.auth import router as auth_router
+from app.api.user import router as user_router
+from app.api.subject import router as subject_router
+from app.api.import_data import router as import_router
+from app.api.fingerprint import router as fingerprint_router
 
-# ---------------------------
-# APP INIT
-# ---------------------------
+from app.dependencies import user_service
+
 app = FastAPI()
 
-# ---------------------------
-# DATABASE
-# ---------------------------
-database = Database(DATABASE_URL)
-
-# ---------------------------
-# MINIO CLIENT
-# ---------------------------
-minio_client = Minio(
-    MINIO_ENDPOINT,
-    access_key=MINIO_ACCESS_KEY,
-    secret_key=MINIO_SECRET_KEY,
-    secure=False
-)
-
-# ---------------------------
-# STARTUP EVENT
-# ---------------------------
 @app.on_event("startup")
 async def startup():
-    # DB CONNECT
     await database.connect()
-    print("Database connected")
+    init_minio()
 
-    # MINIO SETUP
-    try:
-        if not minio_client.bucket_exists(MINIO_BUCKET):
-            minio_client.make_bucket(MINIO_BUCKET)
-            print(f"Bucket '{MINIO_BUCKET}' created")
-        else:
-            print(f"Bucket '{MINIO_BUCKET}' already exists")
+    admin = await user_service.get_user("admin")
+    if not admin:
+        await user_service.create_admin({
+            "first_name": "admin",
+            "last_name": "admin",
+            "username": "admin",
+            "email": "admin@example.de",
+            "password": os.getenv("ADMIN_PASSWORD"),
+            "role" : "admin"
+        })
 
-    except S3Error as e:
-        print("MinIO error:", e)
-
-
-# ---------------------------
-# SHUTDOWN EVENT
-# ---------------------------
 @app.on_event("shutdown")
 async def shutdown():
     await database.disconnect()
-    print("Database disconnected")
 
-
-# ---------------------------
-# TEST ROUTES
-# ---------------------------
 @app.get("/")
 def root():
-    return {"status": "backend running"}
+    return {"status": "running"}
 
-
-@app.get("/test-db")
-async def test_db():
-    query = "SELECT 1 as ok"
-    result = await database.fetch_one(query)
-    return {"db": result}
-
-
-@app.get("/test-minio")
-def test_minio():
-    buckets = minio_client.list_buckets()
-    return {"buckets": [b.name for b in buckets]}
+app.include_router(health_router)
+app.include_router(test_router)
+app.include_router(auth_router)
+app.include_router(user_router)
+app.include_router(subject_router)
+app.include_router(import_router)
+app.include_router(fingerprint_router)
