@@ -67,8 +67,8 @@ class FingerprintService:
             self.embedding_method
         )
 
+        # format for storing vector in db
         return "[" + ",".join(str(x) for x in vec) + "]"
-
 
     # UPLOAD
     async def upload_fingerprint(
@@ -224,7 +224,7 @@ class FingerprintService:
                 :hand,
                 :finger,
                 :filename,
-                :feature_vector
+                CAST(:feature_vector as vector)
             )
             RETURNING *
         """
@@ -442,7 +442,7 @@ class FingerprintService:
                 id,
                 subject_external_id,
                 filename,
-                feature_vector <=> :embedding AS distance
+                feature_vector <-> CAST(:embedding as vector) AS distance
             FROM fingerprints
             ORDER BY distance ASC
             LIMIT 1
@@ -470,12 +470,11 @@ class FingerprintService:
     async def match_fingerprint(
         self,
         file,
-        k: int = 10
+        k: int = 5
     ):
 
-        # load uploaded fingerprint image
+        # load fingerprint image
         # create retrieval embedding
-        #
         # this embedding is used only for:
         # pgvector similarity retrieval
         embedding = self.create_embedding(file)
@@ -487,7 +486,7 @@ class FingerprintService:
                 subject_external_id,
                 image_url,
                 filename,
-                feature_vector <=> :embedding AS distance
+                feature_vector <-> CAST(:embedding as vector) AS distance
             FROM fingerprints
             ORDER BY distance ASC
             LIMIT :k
@@ -516,9 +515,10 @@ class FingerprintService:
 
                 # retrieve image bytes from storage
 
-                image_bytes = self.storage_service.download_image(
-                    candidate["image_url"]
-                )
+                try:
+                    image_bytes = self.storage_service.get_image(candidate["image_url"])
+                except Exception:
+                    continue
 
                 # convert bytes -> opencv image
                 image_array = np.frombuffer(
@@ -543,9 +543,14 @@ class FingerprintService:
             except Exception:
                 continue
 
-        # minutiae verification
 
-        results = self.fingerprint_minutiae_matcher.match_candidates(file,candidate_images)
+        # minutiae verification
+        query_image = self.load_image(file)
+
+        results = self.fingerprint_minutiae_matcher.match_candidates(
+            query_image,
+            candidate_images
+        )
 
         # enrich results with:
         # fingerprint metadata

@@ -66,7 +66,7 @@ class ImportService:
                 skipped_files += 1
                 continue
 
-            external_id = meta["external_id"]
+            external_id = int(meta["external_id"])
 
             subject_data = subjects.get(external_id)
 
@@ -96,7 +96,7 @@ class ImportService:
                             "external_id": external_id,
                             "first_name": subject_data["first_name"],
                             "last_name": subject_data["last_name"],
-                            "age": subject_data["age"],
+                            "age": int(subject_data["age"]),
                             "address": subject_data["address"],
                             "city": subject_data["city"],
                             "country": subject_data["country"],

@@ -72,7 +72,7 @@ class FingerprintMinutiaeMatcher:
         ):
 
 
-            self.minutiae_embedder(query_image)
+            query_minutiae = self.minutiae_embedder(query_image)
 
             results = []
 
@@ -81,7 +81,6 @@ class FingerprintMinutiaeMatcher:
                 candidate_id = candidate["id"]
 
                 candidate_image = candidate["image"]
-
 
                 # extract candidate minutiae
                 candidate_minutiae = (
@@ -94,39 +93,23 @@ class FingerprintMinutiaeMatcher:
                     len(query_minutiae) == 0 or
                     len(candidate_minutiae) == 0
                 ):
-
-                    results.append({
-
-                        "candidate_id": candidate_id,
-
-                        "accuracy": 0.0,
-
-                        "total_matches": 0,
-
-                        "matched_points": []
-                    })
-
                     continue
 
 
-                # align candidate minutiae
-                aligned_candidate = (
-                    self.align_minutiae(
-                        query_minutiae,
-                        candidate_minutiae
-                    )
+                # align candidate minutiae, take n points find best alignment
+                aligned_candidate = self.best_alignment_minutiae(
+                    query_minutiae,
+                    candidate_minutiae,
+                    top_n=5
                 )
 
                 # find matching points
-                matched_points = (
-                    self.find_matches(
+                matched_points = self.find_matches(
                         query_minutiae,
                         aligned_candidate
                     )
-                )
 
                 # compute match score
-
                 total_possible = max(
                     len(query_minutiae),
                     len(candidate_minutiae)
@@ -137,28 +120,18 @@ class FingerprintMinutiaeMatcher:
                     total_possible
                 )
 
-
-                results.append({
-
-                    "candidate_id": candidate_id,
-
-                    "accuracy": accuracy,
-
-                    "total_matches": len(
-                        matched_points
-                    ),
-
-                    "query_minutiae_count": len(
-                        query_minutiae
-                    ),
-
-                    "candidate_minutiae_count": len(
-                        candidate_minutiae
-                    ),
-
-                    # used later for visualization
-                    "matched_points": matched_points
-                })
+                # filter out matchings under 80%
+                if accuracy > 0.8:
+                    results.append({
+                        "candidate_id": candidate_id,
+                        "subject_external_id": candidate.get("subject_external_id"),
+                        "accuracy": accuracy,
+                        "total_matches": len(matched_points),
+                        "query_minutiae_count": len(query_minutiae),
+                        "candidate_minutiae_count": len(candidate_minutiae),
+                        # used later for visualization
+                        "matched_points": matched_points
+                    })
 
 
             # sort by best match
@@ -169,6 +142,55 @@ class FingerprintMinutiaeMatcher:
             )
 
             return results
+
+    def best_alignment_minutiae(
+        self,
+        query_minutiae,
+        candidate_minutiae,
+        top_n: int = 5
+    ):
+
+        candidate_refs = candidate_minutiae[:top_n]
+        query_ref = query_minutiae[0]
+
+        best_score = 0
+        best_aligned = None
+
+        for ref_c in candidate_refs:
+
+            rotation_angle = math.radians(
+                query_ref["angle"] - ref_c["angle"]
+            )
+
+            cos_theta = math.cos(rotation_angle)
+            sin_theta = math.sin(rotation_angle)
+
+            aligned = []
+
+            for minutia in candidate_minutiae:
+
+                rel_x = minutia["x"] - ref_c["x"]
+                rel_y = minutia["y"] - ref_c["y"]
+
+                rotated_x = rel_x * cos_theta - rel_y * sin_theta
+                rotated_y = rel_x * sin_theta + rel_y * cos_theta
+
+                aligned.append({
+                    "x": rotated_x + query_ref["x"],
+                    "y": rotated_y + query_ref["y"],
+                    "angle": minutia["angle"] + math.degrees(rotation_angle),
+                    "type": minutia["type"]
+                })
+
+                matched = self.find_matches(query_minutiae, aligned)
+
+                score = len(matched) / max(len(query_minutiae), len(candidate_minutiae))
+
+                if score > best_score:
+                    best_score = score
+                    best_aligned = aligned
+
+        return best_aligned
 
 
     def align_minutiae(
@@ -183,6 +205,8 @@ class FingerprintMinutiaeMatcher:
 
             1. rotation
             2. translation
+
+        drawback: only one point of reference
         """
 
         query_ref = query_minutiae[0]
@@ -248,13 +272,13 @@ class FingerprintMinutiaeMatcher:
 
                 "y": final_y,
 
+                "type": minutia["type"],
+
                 # rotate angle too
                 "angle": (
                     minutia["angle"] +
                     math.degrees(rotation_angle)
-                ),
-
-                "type": minutia["type"]
+                )
             })
 
         return aligned

@@ -20,6 +20,8 @@ class FingerprintCreate(BaseModel):
     hand: str
     finger: str
     filename: str
+    image_url: str
+    feature_vector: str
 
 
 

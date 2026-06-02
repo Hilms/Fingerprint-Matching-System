@@ -65,7 +65,7 @@ class SubjectService:
         subject = await self.db.fetch_one(
             query=query,
             values={
-                "external_id": int(data["external_id"]),
+                "external_id": data.get("external_id"),
                 "first_name": data.get("first_name"),
                 "last_name": data.get("last_name"),
                 "age": data.get("age"),

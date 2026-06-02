@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import math
 from skimage.feature import hog, local_binary_pattern
 from skimage.morphology import skeletonize
 from scipy.signal import convolve2d
@@ -436,133 +437,153 @@ class FingerprintEmbedder:
 
 
     def minutiae_embedder(
-        self,
-        image: np.ndarray
-    ):
+            self,
+            image: np.ndarray
+        ):
 
-        """
-        MINUTIAE BASED EMBEDDER
+            """
+            MINUTIAE BASED EMBEDDER
 
-        ## Idea
-        extract fingerprint landmark points
+            ## Idea
+            extract fingerprint landmark points
 
-        main minutiae types:
-            * ridge endings
-            * ridge bifurcations
+            main minutiae types:
+                * ridge endings
+                * ridge bifurcations
 
-        the implementation uses:
-            * thinning
-            * crossing number algorithm
+            the implementation uses:
+                * thinning
+                * crossing number algorithm
 
-        ## output vector
-        current implementation stores minutiae as: (x, y, type)
+            ## output vector
+            current implementation stores minutiae as: (x, y, type, angle)
 
-        example:
+            example:
 
-        [
-           120, 84, 1,
-           90, 44, 3,
-           ...
-        ]
+            [
+               120, 84, 1,
+               90, 44, 3,
+               ...
+            ]
 
-        where:
-            * 1 = ridge ending
-            * 3 = bifurcation
+            where:
+                * 1 = ridge ending
+                * 3 = bifurcation
 
-        ## advantages
-            * classical biometric approach
-            * interpretable
-            * commonly used in AFIS systems
-            * strong biometric meaning
+            ## advantages
+                * classical biometric approach
+                * interpretable
+                * commonly used in AFIS systems
+                * strong biometric meaning
 
-        ## limitations
-        this representation is NOT naturally suited for vector similarity databases.
+            ## limitations
+            this representation is NOT naturally suited for vector similarity databases.
 
-        reason:
-            * minutiae are geometric structures
-            * spatial relationships matter
-            * point alignment matters
-            * ordering matters
+            reason:
+                * minutiae are geometric structures
+                * spatial relationships matter
+                * point alignment matters
+                * ordering matters
 
-        two fingerprints may contain:
-            * same minutiae
-            * different spatial alignment
+            two fingerprints may contain:
+                * same minutiae
+                * different spatial alignment
 
-        which makes dense vector similarity unreliable
+            which makes dense vector similarity unreliable
 
-        ## why pgvector is weak for minutiae
+            ## why pgvector is weak for minutiae
 
-        vector databases assume:
-            * fixed semantic vector dimensions
-            * consistent vector geometry
+            vector databases assume:
+                * fixed semantic vector dimensions
+                * consistent vector geometry
 
-        minutiae are actually
-            * unordered point sets
-            * geometric graphs
+            minutiae are actually
+                * unordered point sets
+                * geometric graphs
 
-        real minutiae systems usually use:
-            * graph matching
-            * geometric alignment
-            * RANSAC
-            * nearest-neighbor correspondence
+            real minutiae systems usually use:
+                * graph matching
+                * geometric alignment
+                * RANSAC
+                * nearest-neighbor correspondence
 
-        instead of cosine vector similarity
+            instead of cosine vector similarity
 
-        ## current Status
-        the current implementation is:
-            * educationally correct
-            * structurally correct
-            * suitable for experimentation
+            ## current Status
+            the current implementation is:
+                * educationally correct
+                * structurally correct
+                * suitable for experimentation
 
-        but not production-grade minutiae matching
-        """
+            but not production-grade minutiae matching
+            """
 
-        image = self.preprocess(image)
+            image = self.preprocess(image)
 
-        binary = image // 255
+            binary = image // 255
 
-        minutiae = []
+            minutiae = []
 
-        rows, cols = binary.shape
+            rows, cols = binary.shape
 
-        for y in range(1, rows - 1):
-            for x in range(1, cols - 1):
+            for y in range(1, rows - 1):
+                for x in range(1, cols - 1):
 
-                if binary[y, x] != 1:
-                    continue
+                    if binary[y, x] != 1:
+                        continue
 
-                neighbors = [
-                    binary[y - 1, x],
-                    binary[y - 1, x + 1],
-                    binary[y, x + 1],
-                    binary[y + 1, x + 1],
-                    binary[y + 1, x],
-                    binary[y + 1, x - 1],
-                    binary[y, x - 1],
-                    binary[y - 1, x - 1]
-                ]
+                    neighbors = [
+                        binary[y - 1, x],
+                        binary[y - 1, x + 1],
+                        binary[y, x + 1],
+                        binary[y + 1, x + 1],
+                        binary[y + 1, x],
+                        binary[y + 1, x - 1],
+                        binary[y, x - 1],
+                        binary[y - 1, x - 1]
+                    ]
 
-                transitions = 0
+                    transitions = 0
 
-                for i in range(8):
-                    transitions += abs(
-                        neighbors[i] -
-                        neighbors[(i + 1) % 8]
-                    )
+                    neighbors = np.array(neighbors, dtype=np.int32)
 
-                crossing_number = transitions / 2
+                    for i in range(8):
+                        transitions += abs(
+                            neighbors[i] -
+                            neighbors[(i + 1) % 8]
+                        )
 
-                # ridge ending
-                if crossing_number == 1:
-                    minutiae.extend([x, y, 1])
+                    crossing_number = transitions / 2
 
-                # bifurcation
-                elif crossing_number == 3:
-                    minutiae.extend([x, y, 3])
+                    # ridge ending
+                    if crossing_number == 1:
+                        minutiae.append([x, y, 1])
 
-        features = np.array(minutiae, dtype=np.float32)
+                    # bifurcation
+                    elif crossing_number == 3:
+                        minutiae.append([x, y, 3])
 
-        return self.normalize_vector(features)
+            features = []
+
+            for i in range(0, len(minutiae), 3):
+
+                x = minutiae[i][0]
+                y = minutiae[i][1]
+                t = minutiae[i][2]
+
+                # sobel filter: local gradiant for angles
+                gx = int(image[y, x + 1]) - int(image[y, x - 1])
+                gy = int(image[y + 1, x]) - int(image[y - 1, x])
+                angle = math.degrees(math.atan2(gy, gx))
+
+                features.append({
+                    "x": int(x),
+                    "y": int(y),
+                    "type": int(t),
+                    "angle": angle
+                })
+
+            return features
 
 
     def ridge_embedder(

@@ -46,7 +46,6 @@ class StorageService:
                 "path": object_path
             }
 
-    # GET IMAGE (RAW)
     def get_image(self, object_path: str):
 
         try:
@@ -58,9 +57,7 @@ class StorageService:
             return response.read()
 
         except Exception as e:
-            return {
-                "error": str(e)
-            }
+            raise RuntimeError(f"Failed to fetch image from MinIO: {e}")
 
     # SIGNED URL TO IMAGE
     def get_signed_url(self, object_path: str):
