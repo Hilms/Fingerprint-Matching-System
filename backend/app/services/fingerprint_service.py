@@ -73,30 +73,19 @@ class FingerprintService:
     # UPLOAD
     async def upload_fingerprint(
         self,
-        file,
-        user,
-        subject_id: int = None,
+        file=None,
+        external_id: int = None,
         subject_data: dict = None
     ):
 
-        filename = file.filename
-
-        fingerprint_parser = FingerprintParser()
-
-        meta = fingerprint_parser.parse_filename(filename)
-
-        if meta is None:
-
-            raise HTTPException(
-                status_code=400,
-                detail="invalid filename format"
-            )
-
+        # resolve subject (existing or create new)
         subject = None
 
-        if subject_id:
-
-            subject = await self.subject_service.get_subject(subject_id)
+        if external_id:
+            # case existing subject + fingerprint upload
+            subject = await self.subject_service.get_subject(
+                external_id
+            )
 
             if not subject:
 
@@ -106,7 +95,7 @@ class FingerprintService:
                 )
 
         elif subject_data:
-
+            # case new subject (fingerprint optional)
             subject = await self.subject_service.create_subject(
                 subject_data
             )
@@ -115,8 +104,35 @@ class FingerprintService:
 
             raise HTTPException(
                 status_code=400,
-                detail="subject_id or subject_data required"
+                detail="external_id or subject_data required"
             )
+
+        # subject only flow
+        # create subject without fingerprint
+        if file is None:
+
+            return {
+                "message": "subject created",
+                "subject": subject
+            }
+
+        # case (new)subject and fingerprint
+        filename = file.filename
+
+        fingerprint_parser = FingerprintParser()
+
+        meta = fingerprint_parser.parse_filename(
+            filename
+        )
+
+        if meta is None:
+
+            raise HTTPException(
+                status_code=400,
+                detail="invalid filename format"
+            )
+
+        # compute embedding
 
         embedding = self.create_embedding(file)
 
@@ -136,6 +152,8 @@ class FingerprintService:
                 )
             )
 
+        image_url = None
+
         try:
 
             # upload image to storage
@@ -151,7 +169,7 @@ class FingerprintService:
 
                 # create fingerprint entry
 
-                await self.create_fingerprint({
+                fingerprint = await self.create_fingerprint({
                     "subject_external_id": subject["external_id"],
                     "image_url": image_url,
                     "sex": meta["sex"],
@@ -160,24 +178,6 @@ class FingerprintService:
                     "filename": filename,
                     "feature_vector": embedding
                 })
-
-                # activate subject
-                # important:
-                # if subject had no fingerprints before,
-                # set active = TRUE
-
-                activate_query = """
-                    UPDATE subjects
-                    SET has_fingerprints = TRUE
-                    WHERE external_id = :external_id
-                """
-
-                await self.db.execute(
-                    query=activate_query,
-                    values={
-                        "external_id": subject["external_id"]
-                    }
-                )
 
             return {
                 "message": "fingerprint uploaded",
@@ -188,26 +188,24 @@ class FingerprintService:
         except Exception as e:
 
             # rollback storage manually
+            if image_url:
 
-            try:
-                self.storage_service.delete_image(object_path)
-            except Exception:
-                pass
+                try:
+                    self.storage_service.delete_image(image_url)
+
+                except Exception:
+                    pass
 
             raise HTTPException(
                 status_code=500,
                 detail=str(e)
             )
 
-
     # CREATE
     async def create_fingerprint(
         self,
-        data: dict,
-        file_path: str
+        data: dict
     ):
-
-        embedding = self.create_embedding(file_path)
 
         query = """
             INSERT INTO fingerprints (
@@ -240,12 +238,23 @@ class FingerprintService:
                 "hand": data["hand"],
                 "finger": data["finger"],
                 "filename": data["filename"],
-                "feature_vector": embedding
+                "feature_vector": data["feature_vector"]
+            }
+        )
+
+        await self.db.execute(
+            query="""
+                UPDATE subjects
+                SET has_fingerprints = TRUE
+                WHERE external_id = :external_id
+                  AND has_fingerprints = FALSE
+            """,
+            values={
+                "external_id": data["subject_external_id"]
             }
         )
 
         return dict(fingerprint)
-
 
     # DELETE
     async def delete_fingerprint(

@@ -20,8 +20,6 @@ class SubjectCreate(BaseModel):
     city: str | None = None
     country: str | None = None
     phone_number: str | None = None
-    has_fingerprints: bool | None = None
-
 
 class SubjectUpdate(BaseModel):
     first_name: str | None = None
@@ -31,8 +29,6 @@ class SubjectUpdate(BaseModel):
     city: str | None = None
     country: str | None = None
     phone_number: str | None = None
-    has_fingerprints: bool | None = None
-
 
 # PUBLIC ROUTES
 

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, UploadFile, File
+from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
 from pydantic import BaseModel
 
 from app.security.auth import get_current_user
@@ -11,61 +11,25 @@ router = APIRouter(
     tags=["fingerprints"]
 )
 
-ALLOWED_TYPES = [
-        "image/png",
-        "image/jpeg",
-        "image/jpg",
-        "image/bmp"]
+ALLOWED_TYPES = ["image/png", "image/jpeg", "image/jpg", "image/bmp"]
+
 
 class FingerprintCreate(BaseModel):
-    subject_id: int
+    subject_external_id: int
     sex: str
     hand: str
     finger: str
     filename: str
 
 
-# UPLOAD (ADMIN)
-@router.post("/upload")
-async def upload_fingerprint(
-    subject_id: int,
-    file: UploadFile = File(...),
-    user=Depends(get_current_user),
-    _=Depends(require_role("admin"))
-):
 
-    if file.content_type not in ALLOWED_TYPES:
-
-        raise HTTPException(
-            status_code=400,
-            detail="File must be an image"
-        )
-
-    return await fingerprint_service.upload_fingerprint(
-        file,
-        subject_id,
-        user
-    )
-
-
-# CREATE FINGERPRINT (MANUAL / IMPORT USE CASE / ADMIN)
-@router.post("/")
-async def create_fingerprint(
-    data: FingerprintCreate,
-    user=Depends(get_current_user),
-    _=Depends(require_role("admin"))
-):
-    return await fingerprint_service.create_fingerprint(
-        data.dict()
-    )
-
-
-# SEARCH (USER + ADMIN)
+# SEARCH
 @router.get("/search")
 async def search_fingerprints(
     q: str,
     user=Depends(get_current_user)
 ):
+
     return await fingerprint_service.search_fingerprints(q)
 
 
@@ -75,49 +39,84 @@ async def get_metadata(
     fingerprint_id: int,
     user=Depends(get_current_user)
 ):
+
     return await fingerprint_service.get_fingerprint_metadata(
         fingerprint_id
     )
 
 
-# SUBJECT FROM FINGERPRINT
-@router.get("/{fingerprint_id}/subject")
+# GET SUBJECT FROM FINGERPRINT
+@router.get("/{subject_external_id}/subject")
 async def get_subject(
-    fingerprint_id: int,
+    subject_external_id: int,
     user=Depends(get_current_user)
 ):
+
     return await fingerprint_service.get_fingerprint_subject(
-        fingerprint_id
+        subject_external_id
     )
 
 
-# DELETE (ADMIN)
-@router.delete("/{fingerprint_id}")
-async def delete_fingerprint(
-    fingerprint_id: int,
-    user=Depends(get_current_user),
-    _=Depends(require_role("admin"))
-):
-    return await fingerprint_service.delete_fingerprint(
-        fingerprint_id
-    )
-
-
-# MATCHING
-@router.get("/match")
+# MATCH FINGERPRINT
+@router.post("/match")
 async def match_fingerprint(
     file: UploadFile = File(...),
     user=Depends(get_current_user)
 ):
 
     if file.content_type not in ALLOWED_TYPES:
-
         raise HTTPException(
             status_code=400,
             detail="File must be an image"
         )
 
-    return await fingerprint_service.match_fingerprint(
-       file
+    return await fingerprint_service.match_fingerprint(file=file)
+
+
+# UPLOAD (subject + fingerprint in one step)
+@router.post("/admin/upload")
+async def upload_fingerprint(
+    external_id: int,
+    file: UploadFile = File(...),
+    user=Depends(get_current_user),
+    _=Depends(require_role("admin"))
+):
+
+    if file.content_type not in ALLOWED_TYPES:
+        raise HTTPException(
+            status_code=400,
+            detail="File must be an image"
+        )
+
+    return await fingerprint_service.upload_fingerprint(
+        file=file,
+        external_id=external_id
     )
+
+
+# MANUAL CREATE FINGERPRINT (import / UI use case)
+@router.post("/admin")
+async def create_fingerprint(
+    data: FingerprintCreate,
+    user=Depends(get_current_user),
+    _=Depends(require_role("admin"))
+):
+
+    return await fingerprint_service.create_fingerprint(
+        data.dict()
+    )
+
+
+#DELETE
+@router.delete("/admin/{fingerprint_id}")
+async def delete_fingerprint(
+    fingerprint_id: int,
+    user=Depends(get_current_user),
+    _=Depends(require_role("admin"))
+):
+
+    return await fingerprint_service.delete_fingerprint(
+        fingerprint_id
+    )
+
 

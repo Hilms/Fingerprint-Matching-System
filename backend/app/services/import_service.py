@@ -3,6 +3,7 @@ import csv
 
 from app.utils.fingerprint_parser import FingerprintParser
 
+
 class ImportService:
 
     def __init__(
@@ -17,6 +18,7 @@ class ImportService:
         self.subject_service = subject_service
         self.fingerprint_service = fingerprint_service
 
+
     def load_subjects(self, csv_path: str):
 
         subjects = {}
@@ -27,13 +29,12 @@ class ImportService:
 
             for row in reader:
 
-                external_id = int(
-                    row["external_id"]
-                )
+                external_id = int(row["external_id"])
 
                 subjects[external_id] = row
 
         return subjects
+
 
     async def import_data(
         self,
@@ -41,9 +42,7 @@ class ImportService:
         fingerprints_dir: str
     ):
 
-        subjects = self.load_subjects(
-            subjects_csv
-        )
+        subjects = self.load_subjects(subjects_csv)
 
         fingerprint_files = Path(fingerprints_dir).glob("*.BMP")
 
@@ -69,15 +68,11 @@ class ImportService:
 
             external_id = meta["external_id"]
 
-            subject_data = subjects.get(
-                external_id
-            )
+            subject_data = subjects.get(external_id)
 
             if not subject_data:
 
-                print(
-                    f"[SKIP] no subject found for external_id={external_id}"
-                )
+                print(f"[SKIP] no subject found for external_id={external_id}")
 
                 skipped_files += 1
                 continue
@@ -90,14 +85,10 @@ class ImportService:
                     object_path=filename
                 )
 
-                # FINGERPRINT
                 async with self.db.transaction():
 
-                    # SUBJECT
-                    # check if subject already exists
-                    existing = await self.subject_exists_by_external_id(
-                        external_id
-                    )
+                    # subject (create only if missing)
+                    existing = await self.subject_service.get_subject(external_id)
 
                     if not existing:
 
@@ -110,22 +101,22 @@ class ImportService:
                             "city": subject_data["city"],
                             "country": subject_data["country"],
                             "phone_number": subject_data["phone_number"],
-                            "has_fingerprints": True
+                            "has_fingerprints": False
                         })
 
                         imported_subjects += 1
 
-                    await self.fingerprint_service.create_fingerprint(
-                        {
-                            "subject_external_id": external_id,
-                            "image_url": image_url,
-                            "sex": meta["sex"],
-                            "hand": meta["hand"],
-                            "finger": meta["finger"],
-                            "filename": filename
-                        },
-                        file_path=str(file_path)
-                    )
+                    embedding = self.fingerprint_service.create_embedding(file_path)
+
+                    await self.fingerprint_service.create_fingerprint({
+                        "subject_external_id": external_id,
+                        "image_url": image_url,
+                        "sex": meta["sex"],
+                        "hand": meta["hand"],
+                        "finger": meta["finger"],
+                        "filename": filename,
+                        "feature_vector": embedding
+                    })
 
                 imported_fingerprints += 1
 
@@ -135,14 +126,10 @@ class ImportService:
 
                 failed_files += 1
 
-                print( f"[ERROR] {filename} -> {e}")
+                print(f"[ERROR] {filename} -> {e}")
 
                 try:
-
-                    self.storage_service.delete_image(
-                        filename
-                    )
-
+                    self.storage_service.delete_image(image_url)
                 except Exception:
                     pass
 

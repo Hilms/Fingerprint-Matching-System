@@ -73,7 +73,7 @@ class SubjectService:
                 "city": data.get("city"),
                 "country": data.get("country"),
                 "phone_number": data.get("phone_number"),
-                "has_fingerprints": data.get("has_fingerprints", False)
+                "has_fingerprints": data.get("has_fingerprints")
             }
         )
 
