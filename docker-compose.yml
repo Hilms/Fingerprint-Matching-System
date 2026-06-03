@@ -9,7 +9,7 @@ services:
     ports:
       - "${FRONTEND_PORT}:4200"
     volumes:
-      - ./frontend/app:/app
+      - ./frontend:/app
       - /app/node_modules
     depends_on:
       - backend
