@@ -1,8 +1,21 @@
 import { Routes } from '@angular/router';
-import { LoginComponent } from './features/auth/login/login';
+import { AuthComponent } from './features/auth/auth.component';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'login', pathMatch: 'full' },
-  { path: 'login', component: LoginComponent },
+  // default redirect
+  { path: '', redirectTo: 'auth', pathMatch: 'full' },
+  // AUTH (public)
+  { path: 'auth', component: AuthComponent },
+
+  // PROTECTED AREA (later guarded)
+  {
+    path: 'app',
+    children: [
+      // routing to services
+    ]
+  },
+
+  // fallback
+  { path: '**', redirectTo: 'auth' },
 ];
 

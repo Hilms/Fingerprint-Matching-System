@@ -1,0 +1,74 @@
+<div class="auth-wrapper">
+
+  <mat-card class="auth-card">
+
+    <mat-card-title>Fingerprint System</mat-card-title>
+    <p>please login or register</p>
+
+    <!-- MODE TOGGLE -->
+    <div class="toggle">
+      <button mat-button (click)="mode='login'" [class.active]="mode==='login'">
+        Login
+      </button>
+
+      <button mat-button (click)="mode='register'" [class.active]="mode==='register'">
+        Register
+      </button>
+    </div>
+
+    <!-- LOGIN -->
+    <form *ngIf="mode === 'login'" [formGroup]="loginForm" (ngSubmit)="login()">
+
+      <mat-form-field appearance="outline" class="full">
+        <mat-label>Username</mat-label>
+        <input matInput formControlName="username">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full">
+        <mat-label>Password</mat-label>
+        <input matInput type="password" formControlName="password">
+      </mat-form-field>
+
+      <button mat-raised-button color="primary" class="full" [disabled]="loginForm.invalid">
+        Login
+      </button>
+
+    </form>
+
+    <!-- REGISTER -->
+    <form *ngIf="mode === 'register'" [formGroup]="registerForm" (ngSubmit)="register()">
+
+      <mat-form-field appearance="outline" class="full">
+        <mat-label>Username</mat-label>
+        <input matInput formControlName="username">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full">
+        <mat-label>Email</mat-label>
+        <input matInput formControlName="email">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full">
+        <mat-label>Password</mat-label>
+        <input matInput type="password" formControlName="password">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full">
+        <mat-label>First Name</mat-label>
+        <input matInput formControlName="first_name">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full">
+        <mat-label>Last Name</mat-label>
+        <input matInput formControlName="last_name">
+      </mat-form-field>
+
+      <button mat-raised-button color="accent" class="full" [disabled]="registerForm.invalid">
+        Register
+      </button>
+
+    </form>
+
+  </mat-card>
+
+</div>
