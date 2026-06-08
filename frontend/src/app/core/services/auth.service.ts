@@ -20,6 +20,16 @@ export class AuthService {
   register(data: RegisterRequest) {
     return this.http.post<RegisterResponse>(`${this.api}/auth/register`, data);
   }
+
+  store_token(token: string): void {
+    localStorage.setItem('token', token);
+  }
+
+  get_token(): string | null {
+    return localStorage.getItem('token');
+  }
+
+
   logout(): void {
     localStorage.removeItem('token');
   }

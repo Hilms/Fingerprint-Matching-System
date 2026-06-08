@@ -126,8 +126,8 @@ export class AuthComponent {
     };
 
     this.authService.login(data).subscribe({
-        localStorage.setItem('token', res.access_token);
       next: (res: LoginResponse) => {
+        this.authService.store_token(res.access_token);
         this.router.navigate(['/app/dashboard']);
       },
       error: (err) => {
