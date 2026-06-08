@@ -29,7 +29,19 @@ export class AuthService {
     return localStorage.getItem('token');
   }
 
+  get_role(): string | null {
+    const token = this.get_token();
+    if (!token) return null;
+
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return payload.role;
+  }
 
   logout(): void {
     localStorage.removeItem('token');
   }
+
+  is_authenticated(): boolean {
+    return !!this.get_token();
+  }
+}

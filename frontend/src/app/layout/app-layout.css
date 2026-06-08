@@ -1,0 +1,42 @@
+.layout {
+  display: flex;
+  height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 220px;
+  background: #111827;
+  color: white;
+  padding: 15px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sidebar h3 {
+  margin-bottom: 10px;
+}
+
+.sidebar a {
+  color: white;
+  text-decoration: none;
+  padding: 6px;
+  border-radius: 6px;
+}
+
+.sidebar a:hover {
+  background: #1f2937;
+}
+
+/* Content */
+.content {
+  flex: 1;
+  padding: 20px;
+  background: #f4f6f8;
+}
+
+#logout_btn {
+  cursor: pointer;
+}
