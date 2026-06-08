@@ -5,6 +5,10 @@
   justify-content: center;
   align-items: center;
   background: #f4f6f8;
+  background-image: url('../../../assets/fingerprint1.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 /* Card */
@@ -12,10 +16,12 @@
   width: 360px;
   padding: 20px;
   border-radius: 12px;
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 /* Center text */
-.auth-card p,
 mat-card-title {
   text-align: center;
   margin: 0 auto;
@@ -52,4 +58,20 @@ button[mat-raised-button] {
 mat-card-title {
   font-size: 35px;
   margin-bottom: 8px;
+}
+
+.error {
+  color: #f44336;
+  margin: 8px 0;
+  font-size: 13px;
+}
+
+.success {
+  background-color: #eafaf1;
+  color: #1b5e20;
+  padding: 10px 14px;
+  margin: 12px 0;
+  border-left: 4px solid #4caf50;
+  border-radius: 4px;
+  font-size: 14px;
 }
