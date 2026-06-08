@@ -14,12 +14,15 @@ import {
   ValidatorFn
 } from '@angular/forms';
 
-import { AuthService } from './auth.service';
+import { AuthService } from '../../core/services/auth.service';
 import { Router } from '@angular/router';
 
-interface LoginRequest {
-  username: string;
-  password: string;
+import {
+  LoginRequest,
+  RegisterRequest,
+  LoginResponse,
+  RegisterResponse
+} from '../../core/models/auth.models';
 
 // Custom Validators
 export function username_validator(): ValidatorFn {
@@ -32,12 +35,6 @@ export function username_validator(): ValidatorFn {
   };
 }
 
-interface RegisterRequest {
-  username: string;
-  email: string;
-  password: string;
-  first_name: string;
-  last_name: string;
 export function name_validator(): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
     const value = control.value;
@@ -129,8 +126,8 @@ export class AuthComponent {
     };
 
     this.authService.login(data).subscribe({
-      next: (res: any) => {
         localStorage.setItem('token', res.access_token);
+      next: (res: LoginResponse) => {
         this.router.navigate(['/app/dashboard']);
       },
       error: (err) => {
