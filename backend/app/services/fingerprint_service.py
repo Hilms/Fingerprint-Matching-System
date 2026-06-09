@@ -26,7 +26,9 @@ class FingerprintService:
 
 
     def load_image(self, source):
+        #  --> currently passing raw bytes
 
+        # upload file case
         if hasattr(source, "file"):
 
             file_bytes = source.file.read()
@@ -45,10 +47,13 @@ class FingerprintService:
 
             return image
 
-        return cv2.imread(
-            source,
-            cv2.IMREAD_GRAYSCALE
-        )
+        # raw bytes case (file.file)
+        if isinstance(source, (bytes, bytearray)):
+            image_array = np.frombuffer(source, np.uint8)
+            return cv2.imdecode(image_array, cv2.IMREAD_GRAYSCALE)
+
+        # file path case
+        return cv2.imread(source, cv2.IMREAD_GRAYSCALE)
 
 
     def create_embedding(self, source):
@@ -118,6 +123,7 @@ class FingerprintService:
 
         # case (new)subject and fingerprint
         filename = file.filename
+        file_bytes = file.file.read()
 
         fingerprint_parser = FingerprintParser()
 
@@ -133,11 +139,9 @@ class FingerprintService:
             )
 
         # compute embedding
-
-        embedding = self.create_embedding(file)
+        embedding = self.create_embedding(file_bytes)
 
         # check duplicate fingerprints
-
         existing_fingerprint = await self.find_duplicate_fingerprint(
             embedding
         )
@@ -157,7 +161,7 @@ class FingerprintService:
         try:
 
             # upload image to storage
-
+            file.file.seek(0)
             image_url = self.storage_service.upload_image(
                 file=file,
                 object_path=filename
@@ -477,7 +481,10 @@ class FingerprintService:
         # create retrieval embedding
         # this embedding is used only for:
         # pgvector similarity retrieval
-        embedding = self.create_embedding(file)
+        file_bytes = file.file.read()
+        file.file.seek(0)
+
+        embedding = self.create_embedding(file_bytes)
 
         # search nearest fingerprint candidates
         query = """
@@ -545,7 +552,7 @@ class FingerprintService:
 
 
         # minutiae verification
-        query_image = self.load_image(file)
+        query_image = self.load_image(file_bytes)
 
         results = self.fingerprint_minutiae_matcher.match_candidates(
             query_image,
@@ -587,3 +594,18 @@ class FingerprintService:
             })
 
         return enriched_results
+
+    async def get_by_filename(self, filename: str):
+        query = """
+            SELECT id
+            FROM fingerprints
+            WHERE filename = :filename
+            LIMIT 1
+        """
+
+        result = await self.db.fetch_one(
+            query=query,
+            values={"filename": filename}
+        )
+
+        return result is not None

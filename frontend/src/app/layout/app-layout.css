@@ -3,17 +3,28 @@
   height: 100vh;
 }
 
-/* Sidebar */
+.layout {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+/* SIDEBAR */
 .sidebar {
-  width: 220px;
-  background: #111827;
+  width: 240px;
+  height: 100vh;
+  background: #121212;
   color: white;
   padding: 15px;
+  border-right: white solid 1px;
 
   display: flex;
   flex-direction: column;
   gap: 10px;
+  overflow: hidden;
 }
+
 
 .sidebar h3 {
   margin-bottom: 10px;
@@ -30,11 +41,12 @@
   background: #1f2937;
 }
 
-/* Content */
+/* MAIN CONTENT AREA */
 .content {
   flex: 1;
-  padding: 20px;
-  background: #f4f6f8;
+  height: 100vh;
+  overflow-y: auto;
+  background: #121212;
 }
 
 #logout_btn {

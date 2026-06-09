@@ -1,7 +1,10 @@
 import { Routes } from '@angular/router';
 import { AuthComponent } from './features/auth/auth.component';
 import { AppLayoutComponent } from './layout/app-layout.component';
-import { authGuard } from './core/guards/auth.guard';
+import { ImportComponent } from './features/admin/import/import.component';
+
+import { AuthGuard } from './core/guards/auth.guard';
+import { RoleGuard } from './core/guards/role.guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'auth', pathMatch: 'full' },
@@ -12,18 +15,28 @@ export const routes: Routes = [
   {
     path: 'app',
     component: AppLayoutComponent,
-    canActivate: [authGuard],
+    canActivate: [AuthGuard],
     children: [
+
+      // logged-in user paths
       {
         path: 'dashboard',
         loadComponent: () =>
-          import('./features/dashboard/dashboard.component')
-            .then(m => m.DashboardComponent)
+          import('./features/dashboard/dashboard.component').then((m) => m.DashboardComponent),
       },
 
-      { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
-    ]
+      // admin only paths
+      {
+        path: 'admin/import',
+        component: ImportComponent,
+        canActivate: [RoleGuard],
+        data: { role: 'admin' }
+      },
+
+      // fallback inside app
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+    ],
   },
 
-  { path: '**', redirectTo: 'auth' }
+  { path: '**', redirectTo: 'auth' },
 ];

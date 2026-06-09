@@ -1,5 +1,7 @@
+from fastapi import UploadFile
 from pathlib import Path
 import csv
+import io
 
 from app.utils.fingerprint_parser import FingerprintParser
 
@@ -19,7 +21,7 @@ class ImportService:
         self.fingerprint_service = fingerprint_service
 
 
-    def load_subjects(self, csv_path: str):
+    def load_subjects_path(self, csv_path: str):
 
         subjects = {}
 
@@ -35,27 +37,55 @@ class ImportService:
 
         return subjects
 
+    def load_subjects_file(self, csv_file: UploadFile):
+
+       subjects = {}
+
+       content = csv_file.file.read().decode("utf-8")
+       reader = csv.DictReader(io.StringIO(content))
+
+       for row in reader:
+           external_id = int(row["external_id"])
+           subjects[external_id] = row
+
+       return subjects
+
 
     async def import_data(
         self,
-        subjects_csv: str,
-        fingerprints_dir: str
+        #subjects_csv: str,
+        #fingerprints_dir: str
+        subjects_csv_file: UploadFile,
+        fingerprint_files : list[UploadFile]
     ):
 
-        subjects = self.load_subjects(subjects_csv)
+        # subjects = self.load_subjects_path(subjects_csv)
+        # fingerprint_files = Path(fingerprints_dir).glob("*.BMP")
 
-        fingerprint_files = Path(fingerprints_dir).glob("*.BMP")
+        subjects = self.load_subjects_file(subjects_csv_file)
 
         imported_subjects = 0
         imported_fingerprints = 0
         skipped_files = 0
         failed_files = 0
+        existing_fingerprints = 0
 
         fingerprint_parser = FingerprintParser()
 
-        for file_path in fingerprint_files:
+        for file in fingerprint_files:
 
-            filename = file_path.name
+            filename = Path(file.filename).name
+
+            exists = await self.fingerprint_service.get_by_filename(filename)
+
+            if exists:
+                print(f"[SKIP] already exists: {filename}")
+                skipped_files += 1
+                existing_fingerprints +=1
+                continue
+
+
+            file_bytes = file.file.read()
 
             meta = fingerprint_parser.parse_filename(filename)
 
@@ -79,9 +109,10 @@ class ImportService:
 
             try:
 
+                file.file.seek(0)
                 # STORAGE
                 image_url = self.storage_service.upload_image(
-                    file=str(file_path),
+                    file=file,
                     object_path=filename
                 )
 
@@ -106,7 +137,7 @@ class ImportService:
 
                         imported_subjects += 1
 
-                    embedding = self.fingerprint_service.create_embedding(file_path)
+                    embedding = self.fingerprint_service.create_embedding(file_bytes)
 
                     await self.fingerprint_service.create_fingerprint({
                         "subject_external_id": external_id,
@@ -138,5 +169,6 @@ class ImportService:
             "subjects_created": imported_subjects,
             "fingerprints_created": imported_fingerprints,
             "skipped_files": skipped_files,
-            "failed_files": failed_files
+            "failed_files": failed_files,
+            "existing_files": existing_fingerprints
         }

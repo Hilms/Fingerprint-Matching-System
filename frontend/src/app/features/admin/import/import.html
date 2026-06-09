@@ -1,0 +1,158 @@
+<div class="import-wrapper">
+
+  <mat-card class="import-card">
+
+    <h2>Dataset Import</h2>
+
+    <!-- INFO BOX -->
+    <mat-card class="info-box">
+
+      <h3>Import Requirements</h3>
+
+      <p><strong>Fingerprint folder:</strong></p>
+
+      <ul>
+        <li>Upload a folder containing BMP images</li>
+        <li>Filename format must be:</li>
+        <li><code>externalId__sex_hand_finger.bmp</code></li>
+        <li>Example:</li>
+        <li><code>1__m_left_thumb_finger.bmp</code></li>
+        <li><code>25__f_right_index_finger.bmp</code></li>
+      </ul>
+
+      <p><strong>Allowed values:</strong></p>
+      <ul>
+        <li>sex: <code>m</code> or <code>f</code></li>
+        <li>hand: <code>left</code> or <code>right</code></li>
+        <li>finger: thumb, index, middle, ring, little</li>
+      </ul>
+
+      <hr>
+
+      <p><strong>Subjects CSV format:</strong></p>
+
+      <code>
+        external_id, first_name, last_name, age, address, city, country, phone_number
+      </code>
+
+      <p><strong>Important:</strong></p>
+      <ul>
+        <li>external_id must match fingerprint filename ID</li>
+        <li>CSV must be UTF-8 encoded</li>
+        <li>No missing columns allowed</li>
+      </ul>
+
+    </mat-card>
+
+    <!-- FINGERPRINT FOLDER -->
+    <h3>1. Fingerprint Folder</h3>
+
+    <input
+      #folderInput
+      type="file"
+      webkitdirectory
+      multiple
+      (change)="onFolderSelected($event)"
+    >
+
+    <p>
+      Loaded files:
+      <strong>{{ fingerprintFiles.length }}</strong>
+    </p>
+
+    <!-- CSV -->
+    <h3>2. Subjects CSV</h3>
+
+    <input
+      #csvInput
+      type="file"
+      accept=".csv"
+      (change)="onCsvSelected($event)"
+    >
+
+    <p>
+      Selected:
+      <strong>{{ csvFile?.name || 'none' }}</strong>
+    </p>
+
+    <!-- VALIDATION STATUS -->
+    <mat-card class="status-box">
+
+      <h3>Validation</h3>
+
+      <p *ngIf="fingerprintFiles.length > 0">
+        ✔ Fingerprint files loaded
+      </p>
+
+      <p *ngIf="csvFile">
+        ✔ CSV loaded
+      </p>
+
+      <p *ngIf="fingerprintFiles.length === 0">
+        ⚠ No fingerprint folder selected
+      </p>
+
+      <p *ngIf="!csvFile">
+        ⚠ No CSV selected
+      </p>
+
+      <p *ngIf="csvFile && fingerprintFiles.length > 0">
+        ✔ Ready for import
+      </p>
+
+    </mat-card>
+
+    <!-- RESULT -->
+    <mat-card *ngIf="importResult" class="result-box">
+
+      <div class="result-header">
+        <h3>Import Finished</h3>
+
+        <button class="dismiss-btn" (click)="dismissResult()">
+          ✕
+        </button>
+      </div>
+
+      <p>
+        Subjects Created:
+        <strong>{{ importResult.subjects_created }}</strong>
+      </p>
+
+      <p>
+        Fingerprints Created:
+        <strong>{{ importResult.fingerprints_created }}</strong>
+      </p>
+
+      <p>
+        Skipped Files:
+        <strong>{{ importResult.skipped_files }}</strong>
+      </p>
+
+      <p>
+        Failed Files:
+        <strong>{{ importResult.failed_files }}</strong>
+      </p>
+
+      <p>
+        Existing Files:
+        <strong>{{ importResult.existing_files }}</strong>
+      </p>
+
+    </mat-card>
+
+    <!-- IMPORT BUTTON -->
+    <button
+      mat-raised-button
+      color="primary"
+      class="full"
+      (click)="import()"
+      [disabled]="!csvFile || fingerprintFiles.length === 0"
+    >
+      Start Import
+    </button>
+
+
+
+  </mat-card>
+
+</div>

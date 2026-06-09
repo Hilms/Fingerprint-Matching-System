@@ -8,7 +8,8 @@
     <!-- common -->
     <a routerLink="/app/dashboard">Dashboard</a>
     <a routerLink="/app/match">Fingerprint Match</a>
-    <a routerLink="/app/search">Search Subjects</a>
+    <a routerLink="/app/search_fingerprints">Search Fingerprints</a>
+    <a routerLink="/app/search_subjects">Search Subjects</a>
 
     <!-- admin only -->
     <ng-container *ngIf="role === 'admin'">
@@ -18,7 +19,7 @@
       <a routerLink="/app/admin/users">User Management</a>
       <a routerLink="/app/admin/subjects">Subject Management</a>
       <a routerLink="/app/admin/fingerprints">Fingerprint Management</a>
-      <a routerLink="/app/admin/fingerprints">Fingerprint Import</a>
+      <a routerLink="/app/admin/import">Fingerprint Import</a>
 
     </ng-container>
 

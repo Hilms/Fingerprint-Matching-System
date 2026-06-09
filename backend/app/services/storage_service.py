@@ -7,12 +7,10 @@ class StorageService:
     def upload_image(self, file, object_path: str):
 
         # upload image to MinIO
-
         if hasattr(file, "file"):
-            # uploaded file
             file_data = file.file
         else:
-            # path local storage
+            # filepath reads
             file_data = open(file, "rb")
 
         minio_client.put_object(
