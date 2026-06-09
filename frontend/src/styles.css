@@ -1,1 +1,119 @@
 /* You can add global styles to this file, and also import other style files */
+/* =========================
+   INPUT TEXT
+========================= */
+.auth-card .mat-mdc-input-element {
+  color: white !important;
+  caret-color: white !important;
+}
+
+/* =========================
+   LABEL (untouched)
+========================= */
+.auth-card .mdc-floating-label {
+  color: rgba(255,255,255,0.75) !important;
+}
+
+/* =========================
+   PLACEHOLDER
+========================= */
+.auth-card input::placeholder {
+  color: rgba(255,255,255,0.5) !important;
+}
+
+/* =========================
+   DEFAULT OUTLINE (neutral)
+========================= */
+.auth-card .mdc-notched-outline__leading,
+.auth-card .mdc-notched-outline__notch,
+.auth-card .mdc-notched-outline__trailing {
+  border-color: rgba(255,255,255,0.4) !important;
+}
+
+/* =========================
+   HOVER OUTLINE
+========================= */
+.auth-card .mat-mdc-form-field:hover .mdc-notched-outline__leading,
+.auth-card .mat-mdc-form-field:hover .mdc-notched-outline__notch,
+.auth-card .mat-mdc-form-field:hover .mdc-notched-outline__trailing {
+  border-color: rgba(255,255,255,0.8) !important;
+}
+
+/* =========================
+   FOCUS = GREEN
+========================= */
+.auth-card .mat-mdc-form-field.mat-focused .mdc-notched-outline__leading,
+.auth-card .mat-mdc-form-field.mat-focused .mdc-notched-outline__notch,
+.auth-card .mat-mdc-form-field.mat-focused .mdc-notched-outline__trailing {
+  border-color: #08aa08 !important;
+}
+
+/* =========================
+   VALID AFTER TOUCH = GREEN
+========================= */
+.auth-card .mat-mdc-form-field.ng-valid.ng-touched .mdc-notched-outline__leading,
+.auth-card .mat-mdc-form-field.ng-valid.ng-touched .mdc-notched-outline__notch,
+.auth-card .mat-mdc-form-field.ng-valid.ng-touched .mdc-notched-outline__trailing {
+  border-color: #08aa08 !important;
+}
+
+/* =========================
+   INVALID AFTER TOUCH = RED
+========================= */
+.auth-card .mat-mdc-form-field.ng-invalid.ng-touched .mdc-notched-outline__leading,
+.auth-card .mat-mdc-form-field.ng-invalid.ng-touched .mdc-notched-outline__notch,
+.auth-card .mat-mdc-form-field.ng-invalid.ng-touched .mdc-notched-outline__trailing {
+  border-color: #ff5252 !important;
+}
+
+/* =========================
+   ERROR TEXT
+========================= */
+.auth-card .mat-mdc-form-field-error {
+  color: #ff5252 !important;
+}
+
+/* =========================
+   BUTTON BASE
+========================= */
+.auth-card button.mat-mdc-raised-button {
+  border-radius: 10px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  height: 44px;
+  transition: all 0.2s ease;
+}
+
+/* =========================
+   LOGIN BUTTON (PRIMARY)
+========================= */
+.auth-card button.mat-mdc-raised-button.mat-primary {
+  background-color: #ffffff !important;
+  color: #121212 !important;
+}
+
+.auth-card button.mat-mdc-raised-button.mat-primary:hover {
+  background-color: #e6e6e6 !important;
+}
+
+/* =========================
+   REGISTER BUTTON (ACCENT)
+========================= */
+.auth-card button.mat-mdc-raised-button.mat-accent {
+  background-color: transparent !important;
+  border: 1px solid rgba(255,255,255,0.6) !important;
+  color: white !important;
+}
+
+.auth-card button.mat-mdc-raised-button.mat-accent:hover {
+  background-color: rgba(255,255,255,0.1) !important;
+  border-color: white !important;
+}
+
+/* =========================
+   DISABLED BUTTON
+========================= */
+.auth-card button.mat-mdc-raised-button:disabled {
+  background-color: rgba(255,255,255,0.1) !important;
+  color: rgba(255,255,255,0.4) !important;
+}
