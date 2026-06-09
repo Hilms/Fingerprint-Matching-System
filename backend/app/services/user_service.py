@@ -117,6 +117,28 @@ class UserService:
 
         return dict(user) if user else None
 
+
+    async def get_user_mail(
+            self,
+            email: str
+        ):
+            query = """
+                SELECT
+                    email
+                FROM users
+                WHERE email = :email
+            """
+
+            mail = await self.db.fetch_one(
+                query=query,
+                values={
+                    "email": email
+                }
+            )
+
+            return dict(mail) if mail else None
+
+
     async def get_user_with_password(
         self,
         username: str

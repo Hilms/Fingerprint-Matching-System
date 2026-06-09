@@ -27,20 +27,30 @@ class LoginRequest(BaseModel):
 @router.post("/register")
 async def register(data: RegisterRequest):
 
-    existing = await user_service.get_user(
+    existing_user = await user_service.get_user(
             data.username
     )
 
-    if existing:
+    if existing_user:
         raise HTTPException(
             status_code=409,
             detail="user already exists"
         )
 
+    existing_mail = await user_service.get_user_mail(
+        data.email
+    )
+
+    if existing_mail:
+        raise HTTPException(
+           status_code=409,
+           detail="email already exists"
+        )
+
     await user_service.create_user(data)
 
     return {
-        "message": "user created"
+        "message": "user successfully created"
     }
 
 
@@ -55,7 +65,7 @@ async def login(data: LoginRequest):
 
         raise HTTPException(
             status_code=401,
-            detail="wrong username"
+            detail="Invalid username or password"
         )
 
     if not user["is_active"]:
@@ -74,7 +84,7 @@ async def login(data: LoginRequest):
 
         raise HTTPException(
             status_code=401,
-            detail="wrong password"
+            detail="Invalid username or password"
         )
 
     token = create_access_token({

@@ -45,6 +45,19 @@ export function name_validator(): ValidatorFn {
   };
 }
 
+export function email_validator(): ValidatorFn {
+  return (control: AbstractControl): ValidationErrors | null => {
+    const value = control.value;
+
+    if (!value) return null;
+
+    const valid =
+      /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(value);
+
+    return valid ? null : { invalidEmail: true };
+  };
+}
+
 @Component({
   selector: 'app-auth',
   standalone: true,
@@ -68,42 +81,42 @@ export class AuthComponent {
 
   login_error: string | null = null;
   register_error: string | null = null;
-  register_success: string |null = null;
+  register_success: string | null = null;
 
   mode: 'login' | 'register' = 'login';
 
   loginForm = new FormGroup({
     username: new FormControl<string>('', {
       nonNullable: true,
-      validators: [Validators.required, username_validator()]
+      validators: [Validators.required, username_validator()],
     }),
     password: new FormControl<string>('', {
       nonNullable: true,
-      validators: [Validators.required]
-    })
+      validators: [Validators.required],
+    }),
   });
 
   registerForm = new FormGroup({
     username: new FormControl<string>('', {
       nonNullable: true,
-      validators: [Validators.required, username_validator()]
+      validators: [Validators.required, username_validator()],
     }),
     email: new FormControl<string>('', {
       nonNullable: true,
-      validators: [Validators.required, Validators.email]
+      validators: [Validators.required, Validators.email, email_validator()],
     }),
     password: new FormControl<string>('', {
       nonNullable: true,
-      validators: [Validators.required, Validators.minLength(6)]
+      validators: [Validators.required, Validators.minLength(6)],
     }),
     first_name: new FormControl<string>('', {
       nonNullable: true,
-      validators: [Validators.required, name_validator()]
+      validators: [Validators.required, name_validator()],
     }),
     last_name: new FormControl<string>('', {
       nonNullable: true,
-      validators: [Validators.required, name_validator()]
-    })
+      validators: [Validators.required, name_validator()],
+    }),
   });
 
   set_mode(m: 'login' | 'register') {
@@ -131,8 +144,10 @@ export class AuthComponent {
         this.router.navigate(['/app/dashboard']);
       },
       error: (err) => {
-        if (err.status === 401 || err.status === 403) {
-          this.login_error = 'Invalid username or password';
+        if (err.status === 401) {
+          this.login_error = err.error.detail || 'Invalid username or password';
+        } else if (err.status === 403) {
+          this.login_error = err.error.detail || 'User deactivated';
         } else {
           this.login_error = 'Login failed';
         }

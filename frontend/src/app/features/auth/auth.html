@@ -80,6 +80,10 @@
         <mat-error *ngIf="registerForm.controls.email.hasError('email')">
           Invalid email format
         </mat-error>
+
+        <mat-error *ngIf="registerForm.controls.email.hasError('invalidEmail')">
+          Please enter a valid email address
+        </mat-error>
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="full">

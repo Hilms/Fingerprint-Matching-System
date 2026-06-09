@@ -32,7 +32,7 @@ mat-card-title {
   display: flex;
   justify-content: center;
   gap: 10px;
-  margin: 14px 0 18px 0;
+  margin: 10px 0 10px 0;
 }
 
 .active {
@@ -43,6 +43,7 @@ mat-card-title {
 /* Form fields */
 mat-form-field {
   width: 100%;
+  margin-bottom: 5px;
 }
 
 /* Button */
@@ -62,8 +63,8 @@ mat-card-title {
 
 .error {
   color: #f44336;
-  margin: 8px 0;
-  font-size: 13px;
+  margin: 5px 0;
+  font-size: 8px;
 }
 
 .success {
