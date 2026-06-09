@@ -40,12 +40,12 @@
 }
 
 /* =========================
-   FOCUS = GREEN
+   FOCUS = WHITE
 ========================= */
 .auth-card .mat-mdc-form-field.mat-focused .mdc-notched-outline__leading,
 .auth-card .mat-mdc-form-field.mat-focused .mdc-notched-outline__notch,
 .auth-card .mat-mdc-form-field.mat-focused .mdc-notched-outline__trailing {
-  border-color: #08aa08 !important;
+  border-color: #ffffff !important;
 }
 
 /* =========================
@@ -54,7 +54,7 @@
 .auth-card .mat-mdc-form-field.ng-valid.ng-touched .mdc-notched-outline__leading,
 .auth-card .mat-mdc-form-field.ng-valid.ng-touched .mdc-notched-outline__notch,
 .auth-card .mat-mdc-form-field.ng-valid.ng-touched .mdc-notched-outline__trailing {
-  border-color: #08aa08 !important;
+  border-color: #199c0b !important;
 }
 
 /* =========================

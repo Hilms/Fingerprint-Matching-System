@@ -103,7 +103,8 @@ export class AuthComponent {
     }),
     email: new FormControl<string>('', {
       nonNullable: true,
-      validators: [Validators.required, Validators.email, email_validator()],
+      //validators: [Validators.required, Validators.email, email_validator()],
+      validators: [Validators.required, email_validator()],
     }),
     password: new FormControl<string>('', {
       nonNullable: true,

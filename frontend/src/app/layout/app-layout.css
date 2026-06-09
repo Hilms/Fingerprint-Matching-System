@@ -12,13 +12,11 @@
 
 /* SIDEBAR */
 .sidebar {
-  width: 240px;
+  width: auto;
   height: 100vh;
   background: #121212;
   color: white;
   padding: 15px;
-  border-right: white solid 1px;
-
   display: flex;
   flex-direction: column;
   gap: 10px;
