@@ -10,6 +10,14 @@ router = APIRouter(
     tags=["users"]
 )
 
+class newUser(BaseModel):
+    username: str
+    email: str
+    first_name: str
+    last_name: str
+    password: str
+    role: str
+
 class SelfUserUpdate(BaseModel):
     # username: str | None = None
     email: str | None = None
@@ -78,6 +86,21 @@ async def delete_me(
 
 
 # ADMIN
+@router.get("/admin")
+async def get_all_users(
+    _=Depends(require_role("admin"))
+):
+    return await user_service.get_all_users()
+
+
+@router.post("/admin/create")
+async def create_user(
+    data: newUser,
+    _=Depends(require_role("admin"))
+):
+    return await user_service.create_user(data)
+
+
 @router.get("/admin/search")
 async def search_users(
     query: str,
