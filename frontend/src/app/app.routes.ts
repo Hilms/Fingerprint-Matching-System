@@ -1,11 +1,13 @@
 import { Routes } from '@angular/router';
 import { AuthComponent } from './features/auth/auth.component';
 import { AppLayoutComponent } from './layout/app-layout.component';
+import { DashboardComponent } from './features/dashboard/dashboard.component';
 import { ImportComponent } from './features/admin/import/import.component';
 import { UserComponent } from './features/admin/user/user.component';
 
 import { AuthGuard } from './core/guards/auth.guard';
 import { RoleGuard } from './core/guards/role.guard';
+
 
 export const routes: Routes = [
   { path: '', redirectTo: 'auth', pathMatch: 'full' },
@@ -21,8 +23,7 @@ export const routes: Routes = [
       // logged-in user paths
       {
         path: 'dashboard',
-        loadComponent: () =>
-          import('./features/dashboard/dashboard.component').then((m) => m.DashboardComponent),
+        component: DashboardComponent
       },
 
       // admin only paths

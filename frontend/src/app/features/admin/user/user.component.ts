@@ -116,7 +116,7 @@ export class UserComponent implements OnInit {
         this.cdr.detectChanges();
       },
       error: (err: HttpErrorResponse) => {
-        console.error(err)
+        //console.error(err)
         this.showResponse({
           success: false,
           message: err.error.detail ?? 'Unknown error'
@@ -167,7 +167,7 @@ export class UserComponent implements OnInit {
           this.cdr.detectChanges();
         },
         error: (err) => {
-          console.error(err);
+          // console.error(err);
           this.showResponse({
             success: false,
             message: err.error.detail ?? 'Unknown error',
@@ -188,7 +188,7 @@ export class UserComponent implements OnInit {
         this.cdr.detectChanges();
       },
       error: (err) => {
-        console.error(err);
+        // console.error(err);
         this.showResponse({
           success: false,
           message: err.error.detail ?? 'Unknown error',
@@ -220,7 +220,7 @@ export class UserComponent implements OnInit {
         this.cdr.detectChanges();
       },
       error: (err: any) => {
-        console.error(err);
+        //console.error(err);
         this.showResponse({
           success: false,
           message: err.error.detail ?? 'Unknown error',
@@ -259,7 +259,7 @@ export class UserComponent implements OnInit {
         this.cdr.detectChanges();
       },
       error: (err) => {
-        console.error(err);
+        // console.error(err);
         this.showResponse({
           success: false,
           message: err.error.detail ?? 'Unknown error',

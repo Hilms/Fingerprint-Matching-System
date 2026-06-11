@@ -21,16 +21,30 @@ export class AuthService {
     return this.http.post<RegisterResponse>(`${this.api}/auth/register`, data);
   }
 
-  store_token(token: string): void {
-    localStorage.setItem('token', token);
+  refresh_token() {
+    return this.http.post<any>(`${this.api}/auth/refresh`, {
+      refresh_token: this.get_refresh_token(),
+    });
   }
 
-  get_token(): string | null {
-    return localStorage.getItem('token');
+  store_access_token(token: string): void {
+    localStorage.setItem('access_token', token);
+  }
+
+  get_access_token(): string | null {
+    return localStorage.getItem('access_token');
+  }
+
+  store_refresh_token(token: string): void{
+     localStorage.setItem('refresh_token', token);
+  }
+
+  get_refresh_token(): string | null {
+    return localStorage.getItem('refresh_token');
   }
 
   get_role(): string | null {
-    const token = this.get_token();
+    const token = this.get_access_token();
     if (!token) return null;
 
     const payload = JSON.parse(atob(token.split('.')[1]));
@@ -38,10 +52,11 @@ export class AuthService {
   }
 
   logout(): void {
-    localStorage.removeItem('token');
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
   }
 
   is_authenticated(): boolean {
-    return !!this.get_token();
+    return !!this.get_access_token();
   }
 }

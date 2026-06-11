@@ -12,6 +12,7 @@ export interface RegisterRequest {
 }
 
 export interface LoginResponse {
+  refresh_token: string;
   access_token: string;
   token_type: string;
 }

@@ -130,6 +130,7 @@ export class AuthComponent {
   }
 
   login() {
+
     if (this.loginForm.invalid) return;
 
     const raw = this.loginForm.getRawValue();
@@ -141,8 +142,11 @@ export class AuthComponent {
 
     this.authService.login(data).subscribe({
       next: (res: LoginResponse) => {
-        this.authService.store_token(res.access_token);
-        this.router.navigate(['/app/dashboard']);
+        this.authService.store_access_token(res.access_token);
+        this.authService.store_refresh_token(res.refresh_token);
+
+        this.router.navigate(['/app/dashboard'])
+
       },
       error: (err) => {
         if (err.status === 401) {
