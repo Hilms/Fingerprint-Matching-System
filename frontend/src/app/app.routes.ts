@@ -4,6 +4,7 @@ import { AppLayoutComponent } from './layout/app-layout.component';
 import { DashboardComponent } from './features/dashboard/dashboard.component';
 import { ImportComponent } from './features/admin/import/import.component';
 import { UserComponent } from './features/admin/user/user.component';
+import { FingerprintComponent } from './features/fingerprint/fingerprint.component';
 
 import { AuthGuard } from './core/guards/auth.guard';
 import { RoleGuard } from './core/guards/role.guard';
@@ -23,7 +24,11 @@ export const routes: Routes = [
       // logged-in user paths
       {
         path: 'dashboard',
-        component: DashboardComponent
+        component: DashboardComponent,
+      },
+      {
+        path: 'fingerprints',
+        component: FingerprintComponent,
       },
 
       // admin only paths

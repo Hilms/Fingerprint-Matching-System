@@ -1,0 +1,194 @@
+.page-container {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+/* =========================
+   LAYOUT (50/50 split)
+========================= */
+
+.half-card {
+  height: 45vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* =========================
+   TABLE SCROLL AREA
+========================= */
+
+.table-wrapper {
+  overflow: auto;
+  flex: 1;
+}
+
+/* =========================
+   EXISTING STYLE
+========================= */
+
+.management-card,
+.edit-card,
+.password-card,
+.add-user-card {
+  margin-top: 20px;
+  padding: 24px;
+  background: rgba(255,255,255,.05);
+  color: white;
+}
+
+.edit-card,
+.add-user-card{
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.edit-card input,
+.edit-card select,
+.add-user-card select,
+.add-user-card input{
+  padding: 10px;
+  border-radius: 8px;
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.2);
+  color: white;
+}
+
+/* =========================
+   SEARCH
+========================= */
+
+.search-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.search-row input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.2);
+  color: white;
+}
+
+/* =========================
+   TABLE
+========================= */
+
+table {
+  width: 100%;
+}
+
+.mat-mdc-table {
+  background: transparent;
+}
+
+.mat-mdc-header-cell {
+  color: white;
+  font-weight: 600;
+}
+
+.mat-mdc-cell {
+  color: rgba(255,255,255,.85);
+}
+
+/* compact rows */
+.mat-mdc-row, .mat-mdc-header-row {
+  height: 40px;
+}
+
+/* =========================
+   EMPTY STATE
+========================= */
+
+.empty-state {
+  text-align: center;
+  opacity: .7;
+}
+
+/* =========================
+   CARD HEADER
+========================= */
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.card-header h2 {
+  margin: 0;
+  color: white;
+}
+
+/* =========================
+   MODAL (FINGERPRINT VIEW)
+========================= */
+
+.fingerprint-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  width: 700px;
+  max-width: 90vw;
+
+  background: #1f1f1f;
+  color: white;
+
+  z-index: 1000;
+
+  padding: 20px;
+}
+
+.fingerprint-image {
+  width: 100%;
+  max-height: 500px;
+  object-fit: contain;
+  margin-top: 10px;
+}
+
+/* =========================
+   RESPONSE CARD
+========================= */
+
+.response-card{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-top: 20px;
+  padding: 16px;
+  border-radius: 10px;
+  background: rgba(255,255,255,.05);
+  color: white;
+}
+
+.response-icon{
+  margin-right: 10px;
+}
+
+.response-card.success-card{
+  border-left: 4px solid #4caf50;
+}
+
+.response-card.error-card{
+  border-left: 4px solid #f44336;
+}
+
+/* =========================
+   BUTTONS
+========================= */
+
+.buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}

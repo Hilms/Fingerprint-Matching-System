@@ -32,6 +32,12 @@ class SubjectUpdate(BaseModel):
 
 # PUBLIC ROUTES
 
+@router.get("/all")
+async def get_subjects(
+    user=Depends(get_current_user)
+):
+    return await subject_service.get_subjects()
+
 @router.get("/search")
 async def search_subjects(
     q: str,
@@ -39,7 +45,7 @@ async def search_subjects(
 ):
     return await subject_service.search_subjects(q)
 
-@router.get("/{external_id}")
+@router.get("/id/{external_id}")
 async def get_subject(
     external_id: int,
     user=Depends(get_current_user)
@@ -48,7 +54,7 @@ async def get_subject(
 
 
 # ADMIN ROUTES
-@router.post("/admin")
+@router.post("/admin/create")
 async def create_subject(
     data: SubjectCreate,
     user=Depends(get_current_user),
@@ -58,7 +64,7 @@ async def create_subject(
         data.model_dump()
     )
 
-@router.patch("/admin/{external_id}")
+@router.patch("/admin/update/id/{external_id}")
 async def update_subject(
     external_id: int,
     data: SubjectUpdate,
@@ -70,7 +76,7 @@ async def update_subject(
         data.model_dump(exclude_none=True)
     )
 
-@router.delete("/admin/{external_id}")
+@router.delete("/admin/delete/id/{external_id}")
 async def delete_subject(
     external_id: int,
     user=Depends(get_current_user),

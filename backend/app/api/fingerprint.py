@@ -24,6 +24,11 @@ class FingerprintCreate(BaseModel):
     feature_vector: str
 
 
+@router.get("/all")
+async def get_fingerprints(
+    user=Depends(get_current_user)
+):
+    return await fingerprint_service.get_fingerprints()
 
 # SEARCH
 @router.get("/search")
@@ -36,7 +41,7 @@ async def search_fingerprints(
 
 
 # METADATA
-@router.get("/{fingerprint_id}")
+@router.get("/metadata/id/{fingerprint_id}")
 async def get_metadata(
     fingerprint_id: int,
     user=Depends(get_current_user)
@@ -48,7 +53,7 @@ async def get_metadata(
 
 
 # GET SUBJECT FROM FINGERPRINT
-@router.get("/{subject_external_id}/subject")
+@router.get("/subject/id/{subject_external_id}")
 async def get_subject(
     subject_external_id: int,
     user=Depends(get_current_user)
@@ -97,7 +102,7 @@ async def upload_fingerprint(
 
 
 # MANUAL CREATE FINGERPRINT (import / UI use case)
-@router.post("/admin")
+@router.post("/admin/create")
 async def create_fingerprint(
     data: FingerprintCreate,
     user=Depends(get_current_user),
@@ -110,7 +115,7 @@ async def create_fingerprint(
 
 
 #DELETE
-@router.delete("/admin/{fingerprint_id}")
+@router.delete("/admin/delete/id/{fingerprint_id}")
 async def delete_fingerprint(
     fingerprint_id: int,
     user=Depends(get_current_user),

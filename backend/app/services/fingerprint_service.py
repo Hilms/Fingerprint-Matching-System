@@ -260,6 +260,22 @@ class FingerprintService:
 
         return dict(fingerprint)
 
+    # GET
+    async def get_fingerprints(self):
+
+        query = """
+            SELECT *
+            FROM fingerprints
+            ORDER BY subject_external_id
+        """
+
+        fingerprints = await self.db.fetch_all(query)
+
+        return [
+            dict(fingerprint)
+            for fingerprint in fingerprints
+        ]
+
     # DELETE
     async def delete_fingerprint(
         self,

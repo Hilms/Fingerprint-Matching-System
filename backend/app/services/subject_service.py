@@ -105,6 +105,22 @@ class SubjectService:
         return dict(subject)
 
 
+    async def get_subjects(self):
+
+        query = """
+            SELECT *
+            FROM subjects
+            ORDER BY external_id
+        """
+
+        subjects = await self.db.fetch_all(query)
+
+        return [
+            dict(subject)
+            for subject in subjects
+        ]
+
+
     # SEARCH
     async def search_subjects(
         self,
