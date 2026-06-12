@@ -33,12 +33,21 @@
           placeholder="Search subjects..."
         >
 
-        <button mat-raised-button color="primary" (click)="searchSubjects()">
+        <button mat-raised-button color="primary" (click)="searchSubjects(subjectSearchQuery)">
           Search
         </button>
 
         <button mat-icon-button (click)="resetSubjects()" matTooltip="Reset">
           <mat-icon>refresh</mat-icon>
+        </button>
+
+        <button
+          *ngIf="isAdmin"
+          mat-icon-button
+          (click)="openAddFingerprint()"
+          matTooltip="Add fingerprint"
+        >
+          <mat-icon>add</mat-icon>
         </button>
 
       </div>
@@ -51,7 +60,7 @@
       <!-- TABLE -->
       <div class="table-wrapper">
 
-        <table mat-table [dataSource]="subjectDataSource">
+        <table class="table_subject" mat-table [dataSource]="subjectDataSource">
 
           <ng-container matColumnDef="external_id">
             <th mat-header-cell *matHeaderCellDef>ID</th>
@@ -59,28 +68,52 @@
           </ng-container>
 
           <ng-container matColumnDef="first_name">
-            <th mat-header-cell *matHeaderCellDef>First</th>
-            <td mat-cell *matCellDef="let s">{{ s.first_name }}</td>
+            <th mat-header-cell *matHeaderCellDef>First Name</th>
+            <td mat-cell *matCellDef="let s">{{ s.first_name || '-' }}</td>
           </ng-container>
 
           <ng-container matColumnDef="last_name">
-            <th mat-header-cell *matHeaderCellDef>Last</th>
-            <td mat-cell *matCellDef="let s">{{ s.last_name }}</td>
+            <th mat-header-cell *matHeaderCellDef>Last Name</th>
+            <td mat-cell *matCellDef="let s">{{ s.last_name || '-' }}</td>
           </ng-container>
 
           <ng-container matColumnDef="age">
             <th mat-header-cell *matHeaderCellDef>Age</th>
-            <td mat-cell *matCellDef="let s">{{ s.age }}</td>
+            <td mat-cell *matCellDef="let s">{{ s.age ?? '-' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="address">
+            <th mat-header-cell *matHeaderCellDef>Address</th>
+            <td mat-cell *matCellDef="let s">{{ s.address || '-' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="city">
+            <th mat-header-cell *matHeaderCellDef>City</th>
+            <td mat-cell *matCellDef="let s">{{ s.city || '-' }}</td>
           </ng-container>
 
           <ng-container matColumnDef="country">
             <th mat-header-cell *matHeaderCellDef>Country</th>
-            <td mat-cell *matCellDef="let s">{{ s.country }}</td>
+            <td mat-cell *matCellDef="let s">{{ s.country || '-' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="phone_number">
+            <th mat-header-cell *matHeaderCellDef>Phone</th>
+            <td mat-cell *matCellDef="let s">{{ s.phone_number || '-' }}</td>
           </ng-container>
 
           <ng-container matColumnDef="has_fingerprints">
-            <th mat-header-cell *matHeaderCellDef>FP</th>
-            <td mat-cell *matCellDef="let s">{{ s.has_fingerprints }}</td>
+            <th mat-header-cell *matHeaderCellDef>Fingerprints</th>
+            <td mat-cell *matCellDef="let s">
+              {{ s.has_fingerprints ? 'Yes' : 'No' }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="created_at">
+            <th mat-header-cell *matHeaderCellDef>Created</th>
+            <td mat-cell *matCellDef="let s">
+              {{ s.created_at | date:'short' }}
+            </td>
           </ng-container>
 
           <!-- ACTIONS -->
@@ -89,15 +122,15 @@
 
             <td mat-cell *matCellDef="let s">
 
-              <button mat-icon-button (click)="selectSubject(s)">
-                <mat-icon>visibility</mat-icon>
+              <button mat-icon-button (click)="getFingerprints(s.external_id)">
+                <mat-icon>manage_search</mat-icon>
               </button>
 
               <button *ngIf="isAdmin" mat-icon-button>
                 <mat-icon>edit</mat-icon>
               </button>
 
-              <button *ngIf="isAdmin" mat-icon-button>
+              <button *ngIf="isAdmin" mat-icon-button (click)="deleteSubject(s.external_id)">
                 <mat-icon>delete</mat-icon>
               </button>
 
@@ -117,41 +150,21 @@
     ========================= -->
     <mat-card class="management-card half-card">
 
-      <h2>
-        Fingerprints
+
+      <div class="fingerprint_header_wrapper">
+        <h2>Fingerprints</h2>
+
+        <div class="search-row">
+          <button mat-icon-button (click)="resetFingerprints()" matTooltip="Reset">
+            <mat-icon>refresh</mat-icon>
+          </button>
+        </div>
 
         <span *ngIf="selectedSubject">
           - {{ selectedSubject.first_name }}
           {{ selectedSubject.last_name }}
           (#{{ selectedSubject.external_id }})
         </span>
-      </h2>
-
-      <!-- SEARCH -->
-      <div class="search-row">
-
-        <input
-          [(ngModel)]="fingerprintSearchQuery"
-          placeholder="Search fingerprints..."
-        >
-
-        <button mat-raised-button color="primary" (click)="searchFingerprints()">
-          Search
-        </button>
-
-        <button mat-icon-button (click)="resetFingerprints()" matTooltip="Reset">
-          <mat-icon>refresh</mat-icon>
-        </button>
-
-        <button
-          *ngIf="isAdmin"
-          mat-icon-button
-          (click)="openAddFingerprint()"
-          matTooltip="Add fingerprint"
-        >
-          <mat-icon>add</mat-icon>
-        </button>
-
       </div>
 
       <!-- EMPTY -->
@@ -162,36 +175,53 @@
       <!-- TABLE -->
       <div class="table-wrapper">
 
-        <table mat-table [dataSource]="fingerprintDataSource">
-
+        <table class="table_fingerprint" mat-table [dataSource]="fingerprintDataSource">
+          <!--
           <ng-container matColumnDef="id">
             <th mat-header-cell *matHeaderCellDef>ID</th>
             <td mat-cell *matCellDef="let f">{{ f.id }}</td>
-          </ng-container>
+          </ng-container> -->
 
-          <ng-container matColumnDef="hand">
-            <th mat-header-cell *matHeaderCellDef>Hand</th>
-            <td mat-cell *matCellDef="let f">{{ f.hand }}</td>
-          </ng-container>
-
-          <ng-container matColumnDef="finger">
-            <th mat-header-cell *matHeaderCellDef>Finger</th>
-            <td mat-cell *matCellDef="let f">{{ f.finger }}</td>
+          <ng-container matColumnDef="subject_external_id">
+            <th mat-header-cell *matHeaderCellDef>Subject ID</th>
+            <td mat-cell *matCellDef="let f">
+              {{ f.subject_external_id }}
+            </td>
           </ng-container>
 
           <ng-container matColumnDef="sex">
             <th mat-header-cell *matHeaderCellDef>Sex</th>
-            <td mat-cell *matCellDef="let f">{{ f.sex }}</td>
+            <td mat-cell *matCellDef="let f">
+              {{ f.sex || '-' }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="hand">
+            <th mat-header-cell *matHeaderCellDef>Hand</th>
+            <td mat-cell *matCellDef="let f">
+              {{ f.hand || '-' }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="finger">
+            <th mat-header-cell *matHeaderCellDef>Finger</th>
+            <td mat-cell *matCellDef="let f">
+              {{ f.finger || '-' }}
+            </td>
           </ng-container>
 
           <ng-container matColumnDef="filename">
-            <th mat-header-cell *matHeaderCellDef>File</th>
-            <td mat-cell *matCellDef="let f">{{ f.filename }}</td>
+            <th mat-header-cell *matHeaderCellDef>Filename</th>
+            <td mat-cell *matCellDef="let f">
+              {{ f.filename }}
+            </td>
           </ng-container>
 
           <ng-container matColumnDef="created_at">
             <th mat-header-cell *matHeaderCellDef>Created</th>
-            <td mat-cell *matCellDef="let f">{{ f.created_at | date }}</td>
+            <td mat-cell *matCellDef="let f">
+              {{ f.created_at | date:'short' }}
+            </td>
           </ng-container>
 
           <!-- ACTIONS -->
@@ -200,11 +230,11 @@
 
             <td mat-cell *matCellDef="let f">
 
-              <button mat-icon-button (click)="viewFingerprint(f)">
+              <button mat-icon-button (click)="viewFingerprintImg(f.filename)">
                 <mat-icon>visibility</mat-icon>
               </button>
 
-              <button mat-icon-button (click)="selectFingerprint(f)">
+              <button mat-icon-button (click)="getSubject(f.subject_external_id)">
                 <mat-icon>person</mat-icon>
               </button>
 
@@ -212,7 +242,7 @@
                 <mat-icon>edit</mat-icon>
               </button>
 
-              <button *ngIf="isAdmin" mat-icon-button (click)="deleteFingerprint(f)">
+              <button *ngIf="isAdmin" mat-icon-button (click)="deleteFingerprint(f.id)">
                 <mat-icon>delete</mat-icon>
               </button>
 
@@ -230,7 +260,7 @@
     <!-- =========================
          FINGERPRINT IMAGE MODAL
     ========================= -->
-    <mat-card *ngIf="selectedFingerprint" class="fingerprint-modal">
+    <mat-card *ngIf="viewImg" class="fingerprint-modal">
 
       <div class="card-header">
 
@@ -243,7 +273,7 @@
       </div>
 
       <img
-        [src]="selectedFingerprint.image_url"
+        [src]="image_url"
         class="fingerprint-image"
       >
 
@@ -259,6 +289,7 @@
     >
 
       <div class="card-header">
+
         <h2>Add Fingerprint</h2>
 
         <button mat-icon-button (click)="closeFingerprintForm()">

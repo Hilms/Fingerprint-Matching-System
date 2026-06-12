@@ -16,10 +16,8 @@ export class SubjectService {
   // -------------------------
   // PUBLIC
   // -------------------------
-  searchSubjects(q: string): Observable<Subject[]> {
-    return this.http.get<Subject[]>(`${this.api}/subjects/search`, {
-      params: { q },
-    });
+  searchSubjects(query: string): Observable<Subject[]> {
+    return this.http.get<Subject[]>(`${this.api}/subjects/search?query=${query}`);
   }
 
   getSubjects(): Observable<Subject[]> {

@@ -13,28 +13,22 @@ export class FingerprintService {
 
   constructor(private http: HttpClient) {}
 
+  // -------------------------
+  // SINGLE ITEM
+  // -------------------------
+
+  getFingerprintsBySubjectId(external_id: number): Observable<Fingerprint[]> {
+    return this.http.get<Fingerprint[]>(`${this.api}/fingerprints/id/${external_id}`);
+  }
+
   getFingerprints(): Observable<Fingerprint[]> {
     return this.http.get<Fingerprint[]>(`${this.api}/fingerprints/all`);
   }
 
-  // -------------------------
-  // SEARCH
-  // -------------------------
-  searchFingerprints(q: string): Observable<Fingerprint[]> {
-    return this.http.get<Fingerprint[]>(`${this.api}/fingerprints/search`, {
-      params: { q },
+  getFingerprintImg(filename: string): Observable<Blob> {
+    return this.http.get(`${this.api}/fingerprints/image/${filename}`, {
+      responseType: 'blob'
     });
-  }
-
-  // -------------------------
-  // SINGLE ITEM
-  // -------------------------
-  getFingerprintMetadata(id: number) {
-    return this.http.get(`${this.api}/fingerprints/metadata/id/${id}`);
-  }
-
-  getSubjectFromFingerprint(subjectExternalId: number) {
-    return this.http.get(`${this.api}/fingerprints/subject/id/${subjectExternalId}`);
   }
 
   // -------------------------

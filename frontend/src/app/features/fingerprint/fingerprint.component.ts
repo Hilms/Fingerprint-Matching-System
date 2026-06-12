@@ -33,7 +33,6 @@ import { Subject , Fingerprint} from '../../core/models/fingerprint.models';
   styleUrls: ['./fingerprint.css'],
 })
 export class FingerprintComponent implements OnInit {
-
   isAdmin = false;
 
   successVisible = false;
@@ -51,8 +50,12 @@ export class FingerprintComponent implements OnInit {
     'first_name',
     'last_name',
     'age',
+    'address',
+    'city',
     'country',
+    'phone_number',
     'has_fingerprints',
+    'created_at',
     'actions',
   ];
 
@@ -62,12 +65,15 @@ export class FingerprintComponent implements OnInit {
   fingerprintSearchQuery = '';
 
   selectedFingerprint: Fingerprint | null = null;
+  viewImg: string | null = null;
+  image_url: string |null = null;
 
   fingerprintColumns = [
-    'id',
+    //'id',
+    'subject_external_id',
+    'sex',
     'hand',
     'finger',
-    'sex',
     'filename',
     'created_at',
     'actions',
@@ -113,19 +119,29 @@ export class FingerprintComponent implements OnInit {
     });
   }
 
-  searchSubjects(): void {
-
+  searchSubjects(query: string): void {
+    this.subjectService.searchSubjects(query).subscribe({
+      next: (res: Subject[]) => {
+        this.subjects = res;
+        this.subjectDataSource.data = res;
+      },
+      error: (err: HttpErrorResponse) => this.handleError(err),
+    });
   }
 
   resetSubjects(): void {
     this.loadSubjects();
   }
 
-  selectSubject(subject: Subject): void {
-    this.selectedSubject = subject;
 
-    // sync fingerprint filter
-    this.fingerprintSearchQuery = subject.external_id.toString();
+  getSubject(subject_external_id: number): void{
+    this.subjectService.getSubject(subject_external_id).subscribe({
+      next: (res: Subject) => {
+        this.subjects = [res];
+        this.subjectDataSource.data = [res];
+      },
+      error: (err: HttpErrorResponse) => this.handleError(err),
+    });
   }
 
   /* =========================
@@ -142,17 +158,17 @@ export class FingerprintComponent implements OnInit {
     });
   }
 
-  searchFingerprints(): void {
-    let q: string = this.fingerprintSearchQuery;
-
-    if (this.selectedSubject) {
-      q = `${q} ${this.selectedSubject.external_id}`;
-    }
-
+  getFingerprints(external_id: number): void {
+    this.fingerprintService.getFingerprintsBySubjectId(external_id).subscribe({
+      next: (res: Fingerprint[]) => {
+        this.fingerprints = res;
+        this.fingerprintDataSource.data = res;
+      },
+      error: (err: HttpErrorResponse) => this.handleError(err),
+    });
   }
 
   resetFingerprints(): void {
-    this.fingerprintSearchQuery = '';
     this.loadFingerprints();
   }
 
@@ -160,9 +176,7 @@ export class FingerprintComponent implements OnInit {
     this.selectedFingerprint = fp;
 
     // sync subject selection (reverse relation)
-    const subject = this.subjects.find(
-      s => s.external_id === fp.subject_external_id
-    );
+    const subject = this.subjects.find((s) => s.external_id === fp.subject_external_id);
 
     if (subject) {
       this.selectedSubject = subject;
@@ -173,12 +187,31 @@ export class FingerprintComponent implements OnInit {
      VIEW (IMAGE MODAL)
   ========================= */
 
-  viewFingerprint(fp: Fingerprint): void {
-    this.selectedFingerprint = fp;
+  loadFingerprintImage(filename: string): void {
+    this.fingerprintService.getFingerprintImg(filename).subscribe({
+      next: (blob: Blob) => {
+
+        if (this.image_url) {
+          URL.revokeObjectURL(this.image_url);
+        }
+
+        this.image_url = URL.createObjectURL(blob);
+
+        this.cdr.detectChanges();
+      },
+      error: (err: HttpErrorResponse) => this.handleError(err),
+    });
+  }
+
+  viewFingerprintImg(filename :string): void {
+    this.viewImg = filename
+    this.loadFingerprintImage(filename);
+
   }
 
   closeFingerprintView(): void {
-    this.selectedFingerprint = null;
+    this.viewImg = null;
+    this.image_url = null;
   }
 
   /* =========================
@@ -188,12 +221,11 @@ export class FingerprintComponent implements OnInit {
   openAddFingerprint(): void {
     this.showFingerprintForm = true;
 
-    this.newFingerprint.subject_external_id =
-      this.selectedSubject?.external_id ?? null;
+    this.newFingerprint.subject_external_id = this.selectedSubject?.external_id ?? null;
 
     setTimeout(() => {
       document.getElementById('fingerprintForm')?.scrollIntoView({
-        block: 'nearest'
+        block: 'nearest',
       });
     }, 100);
   }
@@ -225,12 +257,23 @@ export class FingerprintComponent implements OnInit {
      ACTIONS
   ========================= */
 
-  deleteFingerprint(fp: Fingerprint): void {
+  deleteFingerprint(fingerprint_id: number): void {
     if (!confirm('Delete fingerprint?')) return;
 
-    this.fingerprintService.deleteFingerprint(fp.id).subscribe({
+    this.fingerprintService.deleteFingerprint(fingerprint_id).subscribe({
       next: () => {
-        this.showSuccess('Deleted');
+        this.showSuccess('Fingerprint successfully deleted');
+      },
+      error: (err: any) => this.handleError(err),
+    });
+  }
+
+  deleteSubject(subject_id: number): void {
+    if (!confirm('Delete subject?\n This also deletes corresponding Fingerprints!')) return;
+
+    this.subjectService.deleteSubject(subject_id).subscribe({
+      next: () => {
+        this.showSuccess('Subject and corresponding fingerprints successfully deleted');
       },
       error: (err: any) => this.handleError(err),
     });

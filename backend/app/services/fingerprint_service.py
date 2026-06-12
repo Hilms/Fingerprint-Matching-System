@@ -1,4 +1,6 @@
 from fastapi import HTTPException
+from fastapi.responses import StreamingResponse
+import mimetypes
 import cv2
 import numpy as np
 
@@ -270,6 +272,26 @@ class FingerprintService:
         """
 
         fingerprints = await self.db.fetch_all(query)
+
+        return [
+            dict(fingerprint)
+            for fingerprint in fingerprints
+        ]
+
+    async def get_fingerprints_by_subject_id(self, external_id):
+
+        query = """
+            SELECT *
+            FROM fingerprints
+            WHERE subject_external_id = :external_id
+        """
+
+        fingerprints = await self.db.fetch_all(
+            query=query,
+            values={
+                "external_id": external_id
+            }
+        )
 
         return [
             dict(fingerprint)
@@ -625,3 +647,20 @@ class FingerprintService:
         )
 
         return result is not None
+
+    async def get_fingerprint_img(self, filename: str):
+        # return self.storage_service.get_signed_url(filename)
+        image = self.storage_service.get_image(filename)
+
+        media_type, _ = mimetypes.guess_type(filename)
+
+        def iterfile():
+            for chunk in image.stream(32 * 1024):
+                yield chunk  # MUST be bytes
+
+        return StreamingResponse(
+            iterfile(),
+            media_type=media_type or "application/octet-stream"
+        )
+
+

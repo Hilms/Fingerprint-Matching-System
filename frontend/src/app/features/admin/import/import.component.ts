@@ -45,6 +45,8 @@ export class ImportComponent {
         this.importResult = res;
         // CLEAR INPUTS
         this.resetInputs();
+
+        this.cdr.detectChanges();
         // OPTIONAL auto-hide result
         setTimeout(() => {
           this.dismissResult();

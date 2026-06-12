@@ -30,15 +30,29 @@ async def get_fingerprints(
 ):
     return await fingerprint_service.get_fingerprints()
 
+@router.get("/image/{filename}")
+async def get_fingerprint_img(
+    filename: str,
+    user=Depends(get_current_user)
+):
+    return await fingerprint_service.get_fingerprint_img(filename)
+
+
 # SEARCH
 @router.get("/search")
 async def search_fingerprints(
-    q: str,
+    query: str,
     user=Depends(get_current_user)
 ):
 
-    return await fingerprint_service.search_fingerprints(q)
+    return await fingerprint_service.search_fingerprints(query)
 
+@router.get("/id/{external_id}")
+async def get_fingerprints_by_subject_id(
+    external_id: int,
+    user=Depends(get_current_user)
+):
+    return await fingerprint_service.get_fingerprints_by_subject_id(external_id)
 
 # METADATA
 @router.get("/metadata/id/{fingerprint_id}")
@@ -52,9 +66,20 @@ async def get_metadata(
     )
 
 
-# GET SUBJECT FROM FINGERPRINT
 @router.get("/subject/id/{subject_external_id}")
-async def get_subject(
+async def get_subject_fingerprint(
+    subject_external_id: int,
+    user=Depends(get_current_user)
+):
+
+    return await fingerprint_service.get_fingerprint_subject(
+        subject_external_id
+    )
+
+
+# GET SUBJECT & FINGERPRINT FOR MATCHING
+@router.get("/fingerprint_subject/id/{subject_external_id}")
+async def get_fingerprint_subject(
     subject_external_id: int,
     user=Depends(get_current_user)
 ):

@@ -11,19 +11,16 @@
 ========================= */
 
 .half-card {
-  height: 45vh;
+  height: 60vh;
   overflow: hidden;
   display: flex;
   flex-direction: column;
 }
 
-/* =========================
-   TABLE SCROLL AREA
-========================= */
 
-.table-wrapper {
-  overflow: auto;
-  flex: 1;
+.fingerprint_header_wrapper{
+  display: flex;
+  justify-content: space-between;
 }
 
 /* =========================
@@ -78,11 +75,25 @@
 }
 
 /* =========================
+   TABLE SCROLL AREA
+========================= */
+
+.table-wrapper {
+  width:100%;
+  overflow: auto;
+  flex: 1;
+}
+
+
+/* =========================
    TABLE
 ========================= */
 
-table {
-  width: 100%;
+.table_subject {
+  min-width: 1500px;
+}
+.table_fingerprint{
+  min-width: 100%;
 }
 
 .mat-mdc-table {
@@ -101,6 +112,12 @@ table {
 /* compact rows */
 .mat-mdc-row, .mat-mdc-header-row {
   height: 40px;
+}
+
+.mat-mdc-header-cell,
+.mat-mdc-cell {
+  padding: 6px 12px;
+  white-space: nowrap;
 }
 
 /* =========================

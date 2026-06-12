@@ -38,12 +38,14 @@ async def get_subjects(
 ):
     return await subject_service.get_subjects()
 
+
 @router.get("/search")
 async def search_subjects(
-    q: str,
+    query: str,
     user=Depends(get_current_user)
 ):
-    return await subject_service.search_subjects(q)
+    return await subject_service.search_subjects(query)
+
 
 @router.get("/id/{external_id}")
 async def get_subject(
