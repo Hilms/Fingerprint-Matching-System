@@ -378,10 +378,10 @@ export class FingerprintComponent implements OnInit {
      ADD FINGERPRINT
   ========================= */
 
-  openAddFingerprint(): void {
+  openAddFingerprintForSubject(subject: Subject): void {
     this.showFingerprintForm = true;
 
-    this.newFingerprint.subject_external_id = this.selectedSubject?.external_id ?? null;
+    this.newFingerprint.subject_external_id = subject.external_id ?? null;
 
     setTimeout(() => {
       document.getElementById('fingerprintForm')?.scrollIntoView({
@@ -403,11 +403,35 @@ export class FingerprintComponent implements OnInit {
     };
   }
 
-  createFingerprint(): void {
-    this.fingerprintService.createFingerprint(this.newFingerprint).subscribe({
-      next: () => {
-        this.showSuccess('Fingerprint created');
+  onFileSelected(event: Event): void {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+
+    this.newFingerprint.image = file;
+    this.newFingerprint.filename = file.name;
+
+    this.parseFilename(file.name);
+  }
+
+  parseFilename(filename: string): void {
+    const nameWithoutExt = filename.split('.')[0];
+    const parts = nameWithoutExt.split('_');
+
+    if (parts.length < 6) return;
+
+    this.newFingerprint.subject_external_id = Number(parts[0]);
+    this.newFingerprint.sex = parts[2];
+    this.newFingerprint.hand = parts[3];
+    this.newFingerprint.finger = parts[4];
+  }
+
+  uploadFingerprint(): void {
+    this.fingerprintService.uploadFingerprint(this.newFingerprint).subscribe({
+      next: (res) => {
+        this.showResponse(res)
         this.closeFingerprintForm();
+        this.loadFingerprints();
+        this.cdr.detectChanges();
       },
       error: (err: any) => this.handleError(err),
     });
@@ -418,11 +442,13 @@ export class FingerprintComponent implements OnInit {
   ========================= */
 
   deleteFingerprint(fingerprint_id: number): void {
-    if (!confirm('Delete fingerprint?')) return;
+    if (!confirm('Delete fingerprint permenantly?')) return;
 
     this.fingerprintService.deleteFingerprint(fingerprint_id).subscribe({
-      next: () => {
-        this.showSuccess('Fingerprint successfully deleted');
+      next: (res) => {
+        this.showResponse(res)
+        this.loadFingerprints();
+        this.cdr.detectChanges();
       },
       error: (err: any) => this.handleError(err),
     });
@@ -432,8 +458,10 @@ export class FingerprintComponent implements OnInit {
     if (!confirm('Delete subject?\n This also deletes corresponding Fingerprints!')) return;
 
     this.subjectService.deleteSubject(subject_id).subscribe({
-      next: () => {
-        this.showSuccess('Subject and corresponding fingerprints successfully deleted');
+      next: (res) => {
+        this.showResponse(res)
+        this.loadSubjects()
+        this.cdr.detectChanges()
       },
       error: (err: any) => this.handleError(err),
     });
@@ -442,17 +470,6 @@ export class FingerprintComponent implements OnInit {
   /* =========================
      UI HELPERS
   ========================= */
-
-  showSuccess(msg: string): void {
-    this.successMessage = msg;
-    this.successState = 'success';
-    this.successVisible = true;
-
-    setTimeout(() => {
-      this.successVisible = false;
-    }, 3000);
-  }
-
   handleError(err: HttpErrorResponse): void {
     this.successMessage = err.error?.detail ?? 'Error';
     this.successState = 'error';

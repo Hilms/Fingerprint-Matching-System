@@ -44,7 +44,7 @@
         <button
           *ngIf="isAdmin"
           mat-icon-button
-          (click)="openAddFingerprint()"
+
           matTooltip="Add fingerprint"
         >
           <mat-icon>add</mat-icon>
@@ -128,6 +128,10 @@
 
               <button *ngIf="isAdmin" (click)="openUpdateSubject(s)"mat-icon-button>
                 <mat-icon>edit</mat-icon>
+              </button>
+
+              <button *ngIf="isAdmin" mat-icon-button (click)="openAddFingerprintForSubject(s)">
+                <mat-icon>add_circle</mat-icon>
               </button>
 
               <button *ngIf="isAdmin" mat-icon-button (click)="deleteSubject(s.external_id)">
@@ -276,12 +280,12 @@
     </mat-card>
 
   <!-- =========================
-         Update SUBJECT FORM
+         UPDATE SUBJECT FORM
     ========================= -->
     <mat-card
       *ngIf="editingSubject"
       id="updateSubjectForm"
-      class="add-user-card"
+      class="add-card"
     >
 
       <div class="card-header">
@@ -380,40 +384,38 @@
     <!-- =========================
          ADD FINGERPRINT FORM
     ========================= -->
-    <mat-card
-      *ngIf="showFingerprintForm"
-      id="fingerprintForm"
-      class="add-user-card"
+  <mat-card
+    *ngIf="showFingerprintForm"
+    id="fingerprintForm"
+    class="add-card"
+  >
+
+    <div class="card-header">
+      <h2>Add Fingerprint</h2>
+      <button mat-icon-button (click)="closeFingerprintForm()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <!-- Subject -->
+    <input [value]="newFingerprint.subject_external_id" disabled>
+
+    <!-- FILE UPLOAD -->
+    <input type="file" (change)="onFileSelected($event)" />
+
+    <!-- AUTO-FILLED PREVIEW -->
+    <input [(ngModel)]="newFingerprint.sex" placeholder="Sex">
+    <input [(ngModel)]="newFingerprint.hand" placeholder="Hand">
+    <input [(ngModel)]="newFingerprint.finger" placeholder="Finger">
+    <input [(ngModel)]="newFingerprint.filename" placeholder="Filename" disabled>
+
+    <button
+      mat-raised-button
+      color="primary"
+      (click)="uploadFingerprint()"
+      [disabled]="!newFingerprint.filename"
     >
-
-      <div class="card-header">
-
-        <h2>Add Fingerprint</h2>
-
-        <button mat-icon-button (click)="closeFingerprintForm()">
-          <mat-icon>close</mat-icon>
-        </button>
-      </div>
-
-      <input
-        [(ngModel)]="newFingerprint.subject_external_id"
-        placeholder="Subject ID"
-      >
-
-      <input [(ngModel)]="newFingerprint.sex" placeholder="Sex">
-      <input [(ngModel)]="newFingerprint.hand" placeholder="Hand">
-      <input [(ngModel)]="newFingerprint.finger" placeholder="Finger">
-      <input [(ngModel)]="newFingerprint.filename" placeholder="Filename">
-
-      <div class="buttons">
-        <button
-          mat-raised-button
-          color="primary"
-          (click)="createFingerprint()"
-        >
-          Create
-        </button>
-      </div>
-
-    </mat-card>
+      Upload
+    </button>
+  </mat-card>
 </div>

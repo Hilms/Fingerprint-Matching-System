@@ -27,7 +27,7 @@ export class FingerprintService {
 
   getFingerprintImg(filename: string): Observable<Blob> {
     return this.http.get(`${this.api}/fingerprints/image/${filename}`, {
-      responseType: 'blob'
+      responseType: 'blob',
     });
   }
 
@@ -44,7 +44,7 @@ export class FingerprintService {
   // -------------------------
   // ADMIN UPLOAD (image + subject)
   // -------------------------
-  uploadFingerprint(externalId: number, file: File) {
+  Fingerprint(externalId: number, file: File) {
     const formData = new FormData();
     formData.append('file', file);
 
@@ -55,10 +55,15 @@ export class FingerprintService {
   }
 
   // -------------------------
-  // MANUAL CREATE
+  // UPLOAD FINGERPRINT
   // -------------------------
-  createFingerprint(data: FingerprintCreate) {
-    return this.http.post(`${this.api}/fingerprints/admin/create`, data);
+  uploadFingerprint(fingerprint: FingerprintCreate): Observable<any> {
+    const data = new FormData();
+
+    data.append('external_id', String(fingerprint.subject_external_id!));
+    data.append('file', fingerprint.image!);
+
+    return this.http.post(`${this.api}/fingerprints/admin/upload`, data);
   }
 
   // -------------------------

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
+from fastapi import APIRouter, Depends, UploadFile, File, Form, HTTPException
 from pydantic import BaseModel
 
 from app.security.auth import get_current_user
@@ -105,10 +105,10 @@ async def match_fingerprint(
     return await fingerprint_service.match_fingerprint(file=file)
 
 
-# UPLOAD (subject + fingerprint in one step)
+# UPLOAD (subject & fingerprint)
 @router.post("/admin/upload")
 async def upload_fingerprint(
-    external_id: int,
+    external_id: int = Form(...),
     file: UploadFile = File(...),
     user=Depends(get_current_user),
     _=Depends(require_role("admin"))
@@ -123,19 +123,6 @@ async def upload_fingerprint(
     return await fingerprint_service.upload_fingerprint(
         file=file,
         external_id=external_id
-    )
-
-
-# MANUAL CREATE FINGERPRINT (import / UI use case)
-@router.post("/admin/create")
-async def create_fingerprint(
-    data: FingerprintCreate,
-    user=Depends(get_current_user),
-    _=Depends(require_role("admin"))
-):
-
-    return await fingerprint_service.create_fingerprint(
-        data.dict()
     )
 
 

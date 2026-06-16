@@ -77,6 +77,7 @@ class FingerprintService:
         # format for storing vector in db
         return "[" + ",".join(str(x) for x in vec) + "]"
 
+
     # UPLOAD
     async def upload_fingerprint(
         self,
@@ -186,9 +187,8 @@ class FingerprintService:
                 })
 
             return {
-                "message": "fingerprint uploaded",
-                "subject": subject,
-                "fingerprint": fingerprint
+                "success": True,
+                "message": "Upload was successful"
             }
 
         except Exception as e:
@@ -206,6 +206,7 @@ class FingerprintService:
                 status_code=500,
                 detail=str(e)
             )
+
 
     # CREATE
     async def create_fingerprint(
@@ -369,7 +370,8 @@ class FingerprintService:
             )
 
         return {
-            "message": f"fingerprint {fingerprint_id} deleted"
+            "success" : True,
+            "message": f"fingerprint {fingerprint_id} successfully deleted"
         }
 
 

@@ -30,7 +30,7 @@
 .management-card,
 .edit-card,
 .password-card,
-.add-user-card {
+.add-card {
   margin-top: 20px;
   padding: 24px;
   background: rgba(255,255,255,.05);
@@ -38,7 +38,7 @@
 }
 
 .edit-card,
-.add-user-card{
+.add-card{
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -46,8 +46,8 @@
 
 .edit-card input,
 .edit-card select,
-.add-user-card select,
-.add-user-card input{
+.add-card select,
+.add-card input{
   padding: 10px;
   border-radius: 8px;
   background: rgba(255,255,255,.05);

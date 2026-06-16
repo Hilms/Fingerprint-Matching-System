@@ -306,7 +306,8 @@ class SubjectService:
                         pass
 
             return {
-                "message": f"subject {external_id} deleted permanently"
+                "success" : True,
+                "message": f"subject {external_id} and corresponding fingerprints successfully deleted"
             }
 
         except Exception as e:
