@@ -126,7 +126,7 @@
                 <mat-icon>manage_search</mat-icon>
               </button>
 
-              <button *ngIf="isAdmin" mat-icon-button>
+              <button *ngIf="isAdmin" (click)="openUpdateSubject(s)"mat-icon-button>
                 <mat-icon>edit</mat-icon>
               </button>
 
@@ -238,10 +238,6 @@
                 <mat-icon>person</mat-icon>
               </button>
 
-              <button *ngIf="isAdmin" mat-icon-button>
-                <mat-icon>edit</mat-icon>
-              </button>
-
               <button *ngIf="isAdmin" mat-icon-button (click)="deleteFingerprint(f.id)">
                 <mat-icon>delete</mat-icon>
               </button>
@@ -278,6 +274,84 @@
       >
 
     </mat-card>
+
+  <!-- =========================
+         Update SUBJECT FORM
+    ========================= -->
+    <mat-card
+      *ngIf="editingSubject"
+      id="updateSubjectForm"
+      class="add-user-card"
+    >
+
+      <div class="card-header">
+          <h2>
+            Edit Subject #{{ originalSubject?.external_id }}
+          </h2>
+
+          <button mat-icon-button (click)="closeUpdateSubject()">
+            <mat-icon>close</mat-icon>
+          </button>
+      </div>
+      
+      <input
+        [(ngModel)]="editingSubject.first_name"
+        placeholder="First Name"
+      >
+      <input
+        [(ngModel)]="editingSubject.last_name"
+        placeholder="Last Name"
+      >
+
+      <input
+        [(ngModel)]="editingSubject.age"
+        type="number"
+        placeholder="Age"
+      >
+
+      <input
+        [(ngModel)]="editingSubject.address"
+        placeholder="Address"
+      >
+      <input
+        [(ngModel)]="editingSubject.city"
+        placeholder="City"
+      >
+
+      <input
+        [(ngModel)]="editingSubject.country"
+        placeholder="Country"
+      >
+      <input
+        [(ngModel)]="editingSubject.phone_number"
+        placeholder="Phone Number"
+      >
+
+      <div class="buttons">
+
+        <button
+          mat-raised-button
+          color="primary"
+          (click)="updateSubject()"
+          [disabled]="!hasSubjectChanges()"
+        >
+          Update
+        </button>
+
+        <button
+          mat-raised-button
+          color="primary"
+          (click)="resetEditSubject()"
+          [disabled]="!hasSubjectChanges()"
+        >
+          Reset
+        </button>
+
+      </div>
+
+    </mat-card>
+
+
 
     <!-- =========================
          ADD FINGERPRINT FORM

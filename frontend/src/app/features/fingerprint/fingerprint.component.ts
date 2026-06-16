@@ -14,7 +14,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { SubjectService } from '../../core/services/fingerprint.subject.service';
 import { FingerprintService } from '../../core/services/fingerprint.fingerprint.service';
 import { AuthService } from '../../core/services/auth.service';
-import { Subject , Fingerprint} from '../../core/models/fingerprint.models';
+import { Subject, SubjectUpdate, Fingerprint} from '../../core/models/fingerprint.models';
 
 @Component({
   selector: 'app-fingerprint',
@@ -44,6 +44,8 @@ export class FingerprintComponent implements OnInit {
   subjectDataSource = new MatTableDataSource<Subject>([]);
   subjectSearchQuery = '';
   selectedSubject: Subject | null = null;
+  originalSubject: Subject | null = null;
+  editingSubject: SubjectUpdate | null = null;
 
   subjectColumns = [
     'external_id',
@@ -66,7 +68,7 @@ export class FingerprintComponent implements OnInit {
 
   selectedFingerprint: Fingerprint | null = null;
   viewImg: string | null = null;
-  image_url: string |null = null;
+  image_url: string | null = null;
 
   fingerprintColumns = [
     //'id',
@@ -95,8 +97,23 @@ export class FingerprintComponent implements OnInit {
     private subjectService: SubjectService,
     private fingerprintService: FingerprintService,
     private auth: AuthService,
+    private subjectValidator: FingerprintSubjectValidator,
     private cdr: ChangeDetectorRef,
   ) {}
+
+  showResponse(res: any): void {
+    this.successState = res.success ? 'success' : 'error';
+    this.successMessage = res.message;
+
+    this.successVisible = true;
+    this.cdr.detectChanges();
+
+    setTimeout(() => {
+      this.successVisible = false;
+      this.successMessage = null;
+      this.cdr.detectChanges();
+    }, 5000);
+  }
 
   ngOnInit(): void {
     this.isAdmin = this.auth.get_role() === 'admin';
@@ -133,8 +150,7 @@ export class FingerprintComponent implements OnInit {
     this.loadSubjects();
   }
 
-
-  getSubject(subject_external_id: number): void{
+  getSubject(subject_external_id: number): void {
     this.subjectService.getSubject(subject_external_id).subscribe({
       next: (res: Subject) => {
         this.subjects = [res];
@@ -143,6 +159,90 @@ export class FingerprintComponent implements OnInit {
       error: (err: HttpErrorResponse) => this.handleError(err),
     });
   }
+
+  openUpdateSubject(s: Subject): void {
+    this.originalSubject = s;
+
+    this.editingSubject = {
+      first_name: s.first_name,
+      last_name: s.last_name,
+      age: s.age,
+      address: s.address,
+      city: s.city,
+      country: s.country,
+      phone_number: s.phone_number,
+    };
+
+    setTimeout(() => {
+      document.getElementById('updateSubjectForm')?.scrollIntoView({
+        block: 'nearest',
+      });
+    }, 100);
+  }
+
+  closeUpdateSubject(): void {
+    this.editingSubject = null;
+    this.originalSubject = null;
+  }
+
+  resetEditSubject(): void {
+    if (!this.originalSubject) return;
+
+    this.editingSubject = {
+      first_name: this.originalSubject.first_name,
+      last_name: this.originalSubject.last_name,
+      age: this.originalSubject.age,
+      address: this.originalSubject.address,
+      city: this.originalSubject.city,
+      country: this.originalSubject.country,
+      phone_number: this.originalSubject.phone_number,
+    };
+  }
+
+  hasSubjectChanges(): boolean {
+    return (
+      Object.keys(this.getSubjectChanges(this.editingSubject!, this.originalSubject!)).length > 0
+    );
+  }
+
+  getSubjectChanges(editing: SubjectUpdate, original: Subject): SubjectUpdate {
+    const changes: SubjectUpdate = {};
+
+    if (editing.first_name !== original.first_name) changes.first_name = editing.first_name;
+
+    if (editing.last_name !== original.last_name) changes.last_name = editing.last_name;
+
+    if (editing.age !== original.age) changes.age = editing.age;
+
+    if (editing.address !== original.address) changes.address = editing.address;
+
+    if (editing.city !== original.city) changes.city = editing.city;
+
+    if (editing.country !== original.country) changes.country = editing.country;
+
+    if (editing.phone_number !== original.phone_number) changes.phone_number = editing.phone_number;
+
+    return changes;
+  }
+
+  updateSubject(): void {
+    if (!this.originalSubject || !this.editingSubject) return;
+
+    const changes = this.getSubjectChanges(this.editingSubject, this.originalSubject);
+
+    if (Object.keys(changes).length === 0) return;
+
+    this.subjectService.updateSubject(this.originalSubject.external_id, changes).subscribe({
+      next: (res) => {
+        this.showResponse(res);
+        this.closeUpdateSubject();
+        this.loadSubjects();
+        this.cdr.detectChanges();
+      },
+      error: (err) => this.handleError(err),
+    });
+  }
+
 
   /* =========================
      FINGERPRINTS
@@ -190,7 +290,6 @@ export class FingerprintComponent implements OnInit {
   loadFingerprintImage(filename: string): void {
     this.fingerprintService.getFingerprintImg(filename).subscribe({
       next: (blob: Blob) => {
-
         if (this.image_url) {
           URL.revokeObjectURL(this.image_url);
         }
@@ -203,10 +302,10 @@ export class FingerprintComponent implements OnInit {
     });
   }
 
-  viewFingerprintImg(filename :string): void {
-    this.viewImg = filename
+  viewFingerprintImg(filename: string): void {
+    this.viewImg = filename;
     this.loadFingerprintImage(filename);
-
+    this.cdr.detectChanges();
   }
 
   closeFingerprintView(): void {

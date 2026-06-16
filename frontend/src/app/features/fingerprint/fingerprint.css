@@ -201,6 +201,23 @@
 }
 
 /* =========================
+   # SUBJECT UPDATE VALIDATION
+========================= */
+
+.validation {
+  font-size: 12px;
+  margin-bottom: 10px;
+  margin-top: -12px;
+  margin-left: 5px;
+}
+.error {
+  color: #f44336;
+}
+.success {
+  color: #4caf50;
+}
+
+/* =========================
    BUTTONS
 ========================= */
 

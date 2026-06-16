@@ -32,14 +32,14 @@ export class SubjectService {
   // ADMIN
   // -------------------------
   createSubject(data: SubjectCreate) {
-    return this.http.post(`${this.api}/subject/admin/create`, data);
+    return this.http.post(`${this.api}/subjects/admin/create`, data);
   }
 
   updateSubject(externalId: number, data: SubjectUpdate) {
-    return this.http.patch(`${this.api}/subject/admin/update/id/${externalId}`, data);
+    return this.http.patch(`${this.api}/subjects/admin/update/id/${externalId}`, data);
   }
 
   deleteSubject(externalId: number) {
-    return this.http.delete(`${this.api}/subject/admin/delete/id/${externalId}`);
+    return this.http.delete(`${this.api}/subjects/admin/delete/id/${externalId}`);
   }
 }

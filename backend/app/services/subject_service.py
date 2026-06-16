@@ -218,7 +218,10 @@ class SubjectService:
                     values=values
                 )
 
-            return {"message": f"subject {external_id} updated"}
+            return {
+                "success" : True,
+                "message": f"subject {external_id} updated"
+                }
 
         except Exception as e:
 
