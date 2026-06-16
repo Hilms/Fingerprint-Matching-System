@@ -14,10 +14,10 @@ export interface Subject {
 }
 
 export interface SubjectCreate {
-  external_id: number;
+  external_id: number | null;
   first_name?: string;
   last_name?: string;
-  age?: number;
+  age?: number | null;
   address?: string;
   city?: string;
   country?: string;

@@ -44,8 +44,8 @@
         <button
           *ngIf="isAdmin"
           mat-icon-button
-
-          matTooltip="Add fingerprint"
+          (click)="openNewSubjectForm()"
+          matTooltip="Add Subject"
         >
           <mat-icon>add</mat-icon>
         </button>
@@ -126,7 +126,7 @@
                 <mat-icon>manage_search</mat-icon>
               </button>
 
-              <button *ngIf="isAdmin" (click)="openUpdateSubject(s)"mat-icon-button>
+              <button *ngIf="isAdmin" (click)="openUpdateSubjectForm(s)"mat-icon-button>
                 <mat-icon>edit</mat-icon>
               </button>
 
@@ -293,7 +293,7 @@
             Edit Subject #{{ originalSubject?.external_id }}
           </h2>
 
-          <button mat-icon-button (click)="closeUpdateSubject()">
+          <button mat-icon-button (click)="closeUpdateSubjectForm()">
             <mat-icon>close</mat-icon>
           </button>
       </div>
@@ -379,6 +379,111 @@
 
     </mat-card>
 
+      <!-- =========================
+         ADD NEW SUBJECT FORM
+    ========================= -->
+  <mat-card
+    *ngIf="showNewSubjectForm"
+    id="newSubjectForm"
+    class="add-card"
+  >
+
+    <div class="card-header">
+      <h2>Add Subject</h2>
+
+      <button mat-icon-button (click)="closeNewSubjectForm()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <!-- SUBJECT DATA -->
+
+    <input
+      [(ngModel)]="newSubject.first_name"
+      placeholder="First Name"
+    >
+
+    <input
+      [(ngModel)]="newSubject.last_name"
+      placeholder="Last Name"
+    >
+
+    <input
+      type="number"
+      [(ngModel)]="newSubject.age"
+      placeholder="Age"
+    >
+
+    <input
+      [(ngModel)]="newSubject.address"
+      placeholder="Address"
+    >
+
+    <input
+      [(ngModel)]="newSubject.city"
+      placeholder="City"
+    >
+
+    <input
+      [(ngModel)]="newSubject.country"
+      placeholder="Country"
+    >
+
+    <input
+      [(ngModel)]="newSubject.phone_number"
+      placeholder="Phone Number"
+    >
+
+    <hr>
+
+    <h3>Optional Fingerprint Upload</h3>
+
+    <input
+      type="file"
+      accept=".bmp,.png,.jpg,.jpeg"
+      (change)="onSubjectFingerprintSelected($event)"
+    >
+
+    <!-- Preview parsed from filename -->
+
+    <input
+      [(ngModel)]="newFingerprint.sex"
+      placeholder="Sex"
+      disabled
+    >
+
+    <input
+      [(ngModel)]="newFingerprint.hand"
+      placeholder="Hand"
+      disabled
+    >
+
+    <input
+      [(ngModel)]="newFingerprint.finger"
+      placeholder="Finger"
+      disabled
+    >
+
+    <input
+      [(ngModel)]="newFingerprint.filename"
+      placeholder="Filename"
+      disabled
+    >
+
+    <div class="buttons">
+      <button
+        mat-raised-button
+        color="primary"
+        (click)="uploadNewSubject()"
+        [disabled]="false"
+      >
+        Upload
+      </button>
+
+    </div>
+
+  </mat-card>
+
 
 
     <!-- =========================
@@ -412,7 +517,7 @@
     <button
       mat-raised-button
       color="primary"
-      (click)="uploadFingerprint()"
+      (click)="uploadNewFingerprint()"
       [disabled]="!newFingerprint.filename"
     >
       Upload
