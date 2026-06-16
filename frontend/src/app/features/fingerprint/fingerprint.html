@@ -293,39 +293,63 @@
             <mat-icon>close</mat-icon>
           </button>
       </div>
-      
+
       <input
         [(ngModel)]="editingSubject.first_name"
         placeholder="First Name"
       >
+      <p class="validation error" *ngIf="!isNameValid(editingSubject.first_name)">
+        Please enter a valid name
+      </p>
+
       <input
         [(ngModel)]="editingSubject.last_name"
         placeholder="Last Name"
       >
+      <p class="validation error" *ngIf="!isNameValid(editingSubject.last_name)">
+        Please enter a valid name
+      </p>
 
       <input
         [(ngModel)]="editingSubject.age"
         type="number"
         placeholder="Age"
       >
+      <p class="validation error" *ngIf="!isAgeValid(editingSubject.age)">
+        Please enter a valid age
+      </p>
 
       <input
         [(ngModel)]="editingSubject.address"
         placeholder="Address"
       >
+      <p class="validation error" *ngIf="!isAddressValid(editingSubject.address)">
+        Please enter a valid address
+      </p>
+
       <input
         [(ngModel)]="editingSubject.city"
         placeholder="City"
       >
+      <p class="validation error" *ngIf="!isCityValid(editingSubject.city)">
+        Please enter a valid city
+      </p>
 
       <input
         [(ngModel)]="editingSubject.country"
         placeholder="Country"
       >
+      <p class="validation error" *ngIf="!isCountryValid(editingSubject.country)">
+        Please enter a valid country
+      </p>
+
       <input
         [(ngModel)]="editingSubject.phone_number"
         placeholder="Phone Number"
       >
+      <p class="validation error" *ngIf="isPhoneValid(editingSubject.phone_number)">
+        Please enter a valid phone number
+      </p>
 
       <div class="buttons">
 
@@ -333,7 +357,7 @@
           mat-raised-button
           color="primary"
           (click)="updateSubject()"
-          [disabled]="!hasSubjectChanges()"
+          [disabled]="!canUpdate()"
         >
           Update
         </button>

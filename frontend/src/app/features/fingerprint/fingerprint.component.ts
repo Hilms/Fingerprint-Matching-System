@@ -15,6 +15,7 @@ import { SubjectService } from '../../core/services/fingerprint.subject.service'
 import { FingerprintService } from '../../core/services/fingerprint.fingerprint.service';
 import { AuthService } from '../../core/services/auth.service';
 import { Subject, SubjectUpdate, Fingerprint} from '../../core/models/fingerprint.models';
+import { FingerprintSubjectValidator } from '../../core/utils/fingerprint.subject.validator';
 
 @Component({
   selector: 'app-fingerprint',
@@ -243,6 +244,66 @@ export class FingerprintComponent implements OnInit {
     });
   }
 
+  isNameValid(name?: string): boolean {
+    return !!name && this.subjectValidator.isNameValid(name);
+  }
+
+  isAgeValid(age?: number): boolean {
+    return !!age && this.subjectValidator.isAgeValid(age);
+  }
+
+  isAddressValid(address?: string): boolean {
+    return !!address && this.subjectValidator.isAddressValid(address);
+  }
+
+  isCityValid(city?: string): boolean {
+    return !!city && this.subjectValidator.isCityValid(city);
+  }
+
+  isCountryValid(country?: string): boolean {
+    return !!country && this.subjectValidator.isCountryValid(country);
+  }
+
+  isPhoneValid(number?: string): boolean {
+    return !!number && this.subjectValidator.isPhoneValid(number);
+  }
+
+  isValid(subject: SubjectUpdate): boolean {
+    if (!subject) return false;
+
+    return (
+        this.validateOptional(subject.first_name, v => this.isNameValid(v)) &&
+        this.validateOptional(subject.last_name, v => this.isNameValid(v)) &&
+        this.validateOptional(subject.age, v => this.isAgeValid(v)) &&
+        this.validateOptional(subject.address, v => this.isAddressValid(v)) &&
+        this.validateOptional(subject.city, v => this.isCityValid(v)) &&
+        this.validateOptional(subject.country, v => this.isCountryValid(v)) &&
+        this.validateOptional(subject.phone_number, v => this.isPhoneValid(v))
+    );
+  }
+
+  private validateOptional<T>(
+      value: T | undefined | null,
+      validator: (v: T) => boolean
+  ): boolean {
+    // not changed → ignore
+    if (value === undefined || value === null) return true;
+
+    // empty string is invalid (user actively cleared input)
+    if (typeof value === 'string' && value.trim() === '') return false;
+
+    return validator(value);
+  }
+
+  canUpdate(): boolean {
+    if (!this.editingSubject || !this.originalSubject) return false;
+
+    const changes = this.getSubjectChanges(this.editingSubject, this.originalSubject);
+
+    if (Object.keys(changes).length === 0) return false;
+
+    return this.isValid(changes);
+  }
 
   /* =========================
      FINGERPRINTS
