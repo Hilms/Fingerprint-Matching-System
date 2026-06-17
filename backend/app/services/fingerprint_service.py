@@ -86,6 +86,9 @@ class FingerprintService:
         subject_data: dict = None
     ):
 
+        if external_id is not None:
+            external_id = int(external_id)
+
         # resolve subject (existing or create new)
         subject = None
 
@@ -120,8 +123,8 @@ class FingerprintService:
         if file is None:
 
             return {
-                "message": "subject created",
-                "subject": subject
+                "success": True,
+                "message": f"Subject {subject.external_id} successfully created"
             }
 
         # case (new)subject and fingerprint
@@ -177,18 +180,18 @@ class FingerprintService:
                 # create fingerprint entry
 
                 fingerprint = await self.create_fingerprint({
-                    "subject_external_id": subject["external_id"],
-                    "image_url": image_url,
-                    "sex": meta["sex"],
-                    "hand": meta["hand"],
-                    "finger": meta["finger"],
-                    "filename": filename,
-                    "feature_vector": embedding
-                })
+                                    "subject_external_id": subject['external_id'],
+                                    "image_url": image_url,
+                                    "sex": meta["sex"],
+                                    "hand": meta["hand"],
+                                    "finger": meta["finger"],
+                                    "filename": filename,
+                                    "feature_vector": embedding
+                                })
 
             return {
                 "success": True,
-                "message": "Upload was successful"
+                "message": "Fingerprint upload was successful"
             }
 
         except Exception as e:

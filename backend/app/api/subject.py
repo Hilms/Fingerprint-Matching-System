@@ -87,3 +87,10 @@ async def delete_subject(
     return await subject_service.delete_subject(
         external_id
     )
+
+@router.get("/admin/latest_id")
+async def get_latest_subject_id(
+    user=Depends(get_current_user),
+    _=Depends(require_role("admin"))
+):
+    return await subject_service.get_latest_subject_id()

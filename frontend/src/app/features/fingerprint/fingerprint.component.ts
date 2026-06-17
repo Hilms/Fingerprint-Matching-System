@@ -20,6 +20,7 @@ import {
   Fingerprint,
   SubjectCreate,
   FingerprintCreate,
+  LatestSubjectIdResponse,
 } from '../../core/models/fingerprint.models';
 import { FingerprintSubjectValidator } from '../../core/utils/fingerprint.subject.validator';
 
@@ -169,6 +170,15 @@ export class FingerprintComponent implements OnInit {
   openNewSubjectForm(): void {
     this.showNewSubjectForm = true;
 
+    this.subjectService.getLatestSubjectId().subscribe({
+      next: (res: LatestSubjectIdResponse): void => {
+        if (!res.latest_subject_id) return;
+        this.newSubject.external_id = res.latest_subject_id + 1;
+        this.cdr.detectChanges();
+      },
+      error: (err: any): void => this.handleError(err),
+    });
+
     setTimeout((): void => {
       document.getElementById('newSubjectForm')?.scrollIntoView({
         block: 'nearest',
@@ -178,6 +188,7 @@ export class FingerprintComponent implements OnInit {
 
   closeNewSubjectForm(): void {
     this.showNewSubjectForm = false;
+
     this.newSubject = {
       external_id: null,
       first_name: '',
@@ -188,11 +199,48 @@ export class FingerprintComponent implements OnInit {
       country: '',
       phone_number: '',
     };
+
+    this.newFingerprint = {
+      subject_external_id: null,
+      sex: '',
+      hand: '',
+      finger: '',
+      filename: '',
+      image: null,
+    };
   }
 
-  uploadNewSubject() {}
+  uploadNewSubjectValid(): boolean{
+    const a = this.newSubject.external_id;
+    const b = this.newFingerprint.subject_external_id;
 
-  onSubjectFingerprintSelected(event: Event) {}
+    return !!a && (!b || a === b)
+  };
+
+  uploadNewSubject(): void  {
+    this.subjectService.uploadSubject(this.newSubject, this.newFingerprint).subscribe({
+      next: (res: Object): void => {
+        this.showResponse(res)
+        this.loadSubjects();
+        this.loadFingerprints();
+        this.closeNewSubjectForm();
+        this.cdr.detectChanges();
+      },
+      error: (err: any): void => this.handleError(err),
+    });
+  }
+
+  onSubjectFingerprintSelected(event: Event) {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+
+    this.newFingerprint.image = file;
+    this.newFingerprint.filename = file.name;
+
+    this.parseFilename(file.name);
+
+    this.newSubject.external_id = this.newFingerprint.subject_external_id;
+  }
 
   openUpdateSubjectForm(s: Subject): void {
     this.originalSubject = s;
@@ -328,7 +376,10 @@ export class FingerprintComponent implements OnInit {
   canUpdate(): boolean {
     if (!this.editingSubject || !this.originalSubject) return false;
 
-    const changes: SubjectUpdate = this.getSubjectChanges(this.editingSubject, this.originalSubject);
+    const changes: SubjectUpdate = this.getSubjectChanges(
+      this.editingSubject,
+      this.originalSubject,
+    );
 
     if (Object.keys(changes).length === 0) return false;
 
@@ -367,7 +418,9 @@ export class FingerprintComponent implements OnInit {
     this.selectedFingerprint = fingerprint;
 
     // sync subject selection (reverse relation)
-    const subject = this.subjects.find((s: Subject): boolean => s.external_id === fingerprint.subject_external_id);
+    const subject = this.subjects.find(
+      (s: Subject): boolean => s.external_id === fingerprint.subject_external_id,
+    );
 
     if (subject) {
       this.selectedSubject = subject;
@@ -463,7 +516,7 @@ export class FingerprintComponent implements OnInit {
         this.loadFingerprints();
         this.cdr.detectChanges();
       },
-      error: (err: any) : void => this.handleError(err),
+      error: (err: any): void => this.handleError(err),
     });
   }
 
@@ -488,9 +541,10 @@ export class FingerprintComponent implements OnInit {
     if (!confirm('Delete subject?\n This also deletes corresponding Fingerprints!')) return;
 
     this.subjectService.deleteSubject(subject_id).subscribe({
-      next: (res :Object): void => {
+      next: (res: Object): void => {
         this.showResponse(res);
         this.loadSubjects();
+        this.loadFingerprints();
         this.cdr.detectChanges();
       },
       error: (err: any): void => this.handleError(err),

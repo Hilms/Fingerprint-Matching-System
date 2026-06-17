@@ -27,7 +27,7 @@ class SubjectService:
 
         # check if subject already exists
         existing = await self.subject_exists_by_external_id(
-            data["external_id"]
+            int(data["external_id"])
         )
 
         if existing:
@@ -65,7 +65,7 @@ class SubjectService:
         subject = await self.db.fetch_one(
             query=query,
             values={
-                "external_id": data.get("external_id"),
+                "external_id": int(data.get("external_id")),
                 "first_name": data.get("first_name"),
                 "last_name": data.get("last_name"),
                 "age": data.get("age"),
@@ -119,6 +119,24 @@ class SubjectService:
             dict(subject)
             for subject in subjects
         ]
+
+    async def get_latest_subject_id(self):
+
+        query = """
+            SELECT external_id
+            FROM subjects
+            ORDER BY external_id DESC
+            LIMIT 1
+        """
+
+        row = await self.db.fetch_one(query)
+
+        if not row:
+            return {"latest_subject_id": None}
+
+        return {
+            "latest_subject_id" : row["external_id"]
+        }
 
 
     # SEARCH

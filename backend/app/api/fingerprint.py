@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, UploadFile, File, Form, HTTPException
 from pydantic import BaseModel
+import json
 
 from app.security.auth import get_current_user
 from app.security.permission import require_role
@@ -108,13 +109,14 @@ async def match_fingerprint(
 # UPLOAD (subject & fingerprint)
 @router.post("/admin/upload")
 async def upload_fingerprint(
-    external_id: int = Form(...),
-    file: UploadFile = File(...),
+    external_id: int | None = Form(None),
+    subject_data: str | None = Form(None),
+    file: UploadFile | None = File(None),
     user=Depends(get_current_user),
     _=Depends(require_role("admin"))
 ):
 
-    if file.content_type not in ALLOWED_TYPES:
+    if file and file.content_type not in ALLOWED_TYPES:
         raise HTTPException(
             status_code=400,
             detail="File must be an image"
@@ -122,7 +124,8 @@ async def upload_fingerprint(
 
     return await fingerprint_service.upload_fingerprint(
         file=file,
-        external_id=external_id
+        external_id=external_id,
+        subject_data=json.loads(subject_data)
     )
 
 

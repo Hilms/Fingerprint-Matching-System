@@ -397,6 +397,10 @@
     </div>
 
     <!-- SUBJECT DATA -->
+    <input
+      [(ngModel)]="newSubject.external_id"
+      placeholder="Subject Id"
+    >
 
     <input
       [(ngModel)]="newSubject.first_name"
@@ -447,6 +451,12 @@
     <!-- Preview parsed from filename -->
 
     <input
+      [(ngModel)]="newFingerprint.subject_external_id"
+      placeholder="Subject Id"
+      disabled
+    >
+
+    <input
       [(ngModel)]="newFingerprint.sex"
       placeholder="Sex"
       disabled
@@ -475,7 +485,7 @@
         mat-raised-button
         color="primary"
         (click)="uploadNewSubject()"
-        [disabled]="false"
+        [disabled]="!uploadNewSubjectValid()"
       >
         Upload
       </button>

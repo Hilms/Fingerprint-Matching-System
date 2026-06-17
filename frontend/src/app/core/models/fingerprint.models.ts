@@ -34,6 +34,10 @@ export interface SubjectUpdate {
   phone_number?: string;
 }
 
+export interface LatestSubjectIdResponse {
+  latest_subject_id: number | null;
+}
+
 /* FINGERPRINT MODELS */
 
 export interface Fingerprint {
@@ -55,3 +59,5 @@ export interface FingerprintCreate {
   filename: string;
   image: File | null;
 }
+
+
