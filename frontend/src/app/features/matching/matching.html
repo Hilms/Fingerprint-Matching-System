@@ -119,6 +119,19 @@
           {{ matchingResult.accuracy | number:'1.1-2' }}% Match
         </div>
 
+        <mat-card
+          *ngIf="successVisible"
+          class="response-card"
+          [class.success-card]="successState === 'success'"
+          [class.error-card]="successState === 'error'"
+        >
+          <mat-icon class="response-icon">
+            {{ successState === 'success' ? 'check_circle' : 'cancel' }}
+          </mat-icon>
+
+          <span>{{ successMessage }}</span>
+        </mat-card>
+
       </div>
 
     </div>
@@ -143,11 +156,6 @@
       <div class="stat-item">
         <span>Total Matches</span>
         <b>{{ matchingResult.total_matches }}</b>
-      </div>
-
-      <div class="stat-item">
-        <span>Matched Points</span>
-        <b>{{ matchingResult.matched_points }}</b>
       </div>
 
     </div>

@@ -6,9 +6,11 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { HttpErrorResponse } from '@angular/common/http';
 
 import { MatchingService } from '../../core/services/matching.service'
 import { Subject, Fingerprint, MatchingResult} from '../../core/models/matching.models';
+
 
 @Component({
   selector: 'app-matching',
@@ -36,6 +38,9 @@ export class MatchingComponent {
   /* =========================
      UI STATE
   ========================= */
+  successVisible: boolean = false;
+  successMessage: string | null = null;
+  successState: 'success' | 'error' = 'success';
 
   uploadedImage: string | null = null;
   selectedFile: File | null = null;
@@ -63,12 +68,13 @@ export class MatchingComponent {
       return;
     }
 
-    const file = input.files[0];
+    this.selectedFile = input.files[0];
 
     const reader = new FileReader();
 
     reader.onload = () => {
       // IMPORTANT: force Angular update-safe assignment
+      // this is for preview - UI only
       this.uploadedImage = reader.result as string;
 
       // reset previous result
@@ -78,12 +84,12 @@ export class MatchingComponent {
       this.cdr.detectChanges();
     };
 
-    reader.readAsDataURL(file);
+    reader.readAsDataURL(this.selectedFile);
     this.cdr.detectChanges();
   }
 
   /* =========================
-     SEARCH
+     MATCHING
   ========================= */
 
   searchFingerprint(): void {
@@ -93,50 +99,25 @@ export class MatchingComponent {
 
     this.isSearching = true;
 
-    /*
-      TODO:
-      Call your API here.
+    this.matchingService.getMatchings(this.selectedFile!).subscribe({
+      next: (res: any): void => {
 
-      Example:
+        if (!res.success) {
+          this.isSearching = false;
+          this.showResponse(res);
+          return;
+        }
 
-      this.fingerprintService.search(this.selectedFile)
-        .subscribe(...)
-    */
-
-    // MOCK RESPONSE
-
-    setTimeout(() => {
-      this.resultImage = this.uploadedImage;
-
-      this.matchingResult = {
-        accuracy: 96.42,
-        total_matches: 1,
-        query_minutiae_count: 84,
-        candidate_minutiae_count: 89,
-        matched_points: 77,
-      };
-
-      this.subject = {
-        external_id: 1001,
-        first_name: 'John',
-        last_name: 'Doe',
-        age: 34,
-        address: 'Main Street 10',
-        city: 'Berlin',
-        country: 'Germany',
-        phone_number: '+49 123456789',
-      };
-
-      this.fingerprint = {
-        subject_external_id: 1001,
-        sex: 'M',
-        hand: 'Right',
-        finger: 'Index',
-        filename: 'SUB-1001_M_R_Index.bmp',
-      };
-      this.isSearching = false;
-      this.cdr.detectChanges();
-    }, 3000);
+        this.mapResponse(res.data);
+        this.isSearching = false;
+        this.loadFingerprintImage(this.fingerprint!.filename);
+        this.cdr.detectChanges();
+      },
+      error: (err: any): void => {
+        this.handleError(err);
+        this.isSearching = false;
+      },
+    });
   }
 
   /* =========================
@@ -144,14 +125,10 @@ export class MatchingComponent {
   ========================= */
 
   reset(): void {
-
     this.isSearching = false;
-
     this.subject = null;
     this.fingerprint = null;
-
     this.resetUpload();
-
   }
 
   resetUpload(): void {
@@ -167,6 +144,85 @@ export class MatchingComponent {
     }
 
     this.cdr.detectChanges();
+  }
+
+  private loadFingerprintImage(filename: string): void {
+    this.matchingService.getFingerprintImg(filename).subscribe({
+      next: (blob: Blob): void => {
+
+        if (this.resultImage) {
+          URL.revokeObjectURL(this.resultImage);
+        }
+        this.resultImage = URL.createObjectURL(blob);
+        this.cdr.detectChanges();
+      },
+      error: (err: HttpErrorResponse): void => {this.handleError(err)},
+    });
+  }
+
+  private mapResponse(data: any[]): void {
+
+    const bestMatch = data[0];
+
+    this.matchingResult = this.mapResult(bestMatch.result);
+    this.subject = this.mapSubject(bestMatch.subject);
+    this.fingerprint = this.mapFingerprint(bestMatch.fingerprint);
+
+  }
+
+  private mapResult(result: any): MatchingResult {
+    return {
+      accuracy: result?.accuracy ? result.accuracy * 100 : 0,
+      total_matches: result?.total_matches ?? 0,
+      query_minutiae_count: result?.query_minutiae_count ?? 0,
+      candidate_minutiae_count: result?.candidate_minutiae_count ?? 0,
+    };
+  }
+
+  private mapSubject(subject: any): Subject {
+    return {
+      external_id: subject?.external_id ?? null,
+      first_name: subject?.first_name ?? '',
+      last_name: subject?.last_name ?? '',
+      age: subject?.age ?? null,
+      address: subject?.address ?? '',
+      city: subject?.city ?? '',
+      country: subject?.country ?? '',
+      phone_number: subject?.phone_number ?? '',
+    };
+  }
+
+  private mapFingerprint(fingerprint: any): Fingerprint {
+    return {
+      subject_external_id: fingerprint?.subject_external_id ?? null,
+      sex: fingerprint?.sex ?? '',
+      hand: fingerprint?.hand ?? '',
+      finger: fingerprint?.finger ?? '',
+      filename: fingerprint?.filename ?? '',
+    };
+  }
+
+  /* =========================
+     UI HELPERS
+  ========================= */
+  showResponse(res: any): void {
+    this.successState = res.success ? 'success' : 'error';
+    this.successMessage = res.message;
+
+    this.successVisible = true;
+    this.cdr.detectChanges();
+
+    setTimeout((): void => {
+      this.successVisible = false;
+      this.successMessage = null;
+      this.cdr.detectChanges();
+    }, 5000);
+  }
+
+  handleError(err: HttpErrorResponse): void {
+    this.successMessage = err.error?.detail ?? 'Error';
+    this.successState = 'error';
+    this.successVisible = true;
   }
 }
 

@@ -22,5 +22,4 @@ export interface MatchingResult {
   total_matches: number | null;
   query_minutiae_count: number | null;
   candidate_minutiae_count: number | null;
-  matched_points: number | null;
 }

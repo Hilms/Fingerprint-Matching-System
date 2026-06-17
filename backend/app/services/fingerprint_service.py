@@ -550,6 +550,7 @@ class FingerprintService:
             }
         )
 
+
         if not candidates:
             return []
 
@@ -563,10 +564,10 @@ class FingerprintService:
 
             try:
 
-                # retrieve image bytes from storage
-
+                # retrieve image from storage
                 try:
-                    image_bytes = self.storage_service.get_image(candidate["image_url"])
+                    image = self.storage_service.get_image(candidate["image_url"])
+                    image_bytes = image.read()
                 except Exception:
                     continue
 
@@ -593,7 +594,6 @@ class FingerprintService:
             except Exception:
                 continue
 
-
         # minutiae verification
         query_image = self.load_image(file_bytes)
 
@@ -618,7 +618,6 @@ class FingerprintService:
 
             subject_external_id = result["subject_external_id"]
 
-            # CACHE SUBJECT LOOKUP (avoid repeated DB calls)
             if subject_external_id not in subject_cache:
                 subject_cache[subject_external_id] = await self.get_fingerprint_subject(
                     subject_external_id
@@ -629,14 +628,22 @@ class FingerprintService:
             enriched_results.append({
                 "fingerprint": fingerprint_metadata,
                 "subject": subject,
-                "accuracy": result["accuracy"],
-                "total_matches": result["total_matches"],
-                "query_minutiae_count": result["query_minutiae_count"],
-                "candidate_minutiae_count": result["candidate_minutiae_count"],
-                "matched_points": result["matched_points"]
+                "result": result
             })
 
-        return enriched_results
+        if len(enriched_results) == 0:
+            return {
+                "success": False,
+                "message": "No Match Found in Database",
+                "data": []
+            }
+
+        return {
+            "success": True,
+            "message": "Match Found",
+            "data": enriched_results
+        }
+
 
     async def get_by_filename(self, filename: str):
         query = """

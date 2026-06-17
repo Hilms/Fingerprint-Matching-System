@@ -71,7 +71,6 @@ class FingerprintMinutiaeMatcher:
             candidates
         ):
 
-
             query_minutiae = self.minutiae_embedder(query_image)
 
             results = []
@@ -124,6 +123,7 @@ class FingerprintMinutiaeMatcher:
                 if accuracy > 0.8:
                     results.append({
                         "candidate_id": candidate_id,
+                        #"image": candidate_image,
                         "subject_external_id": candidate.get("subject_external_id"),
                         "accuracy": accuracy,
                         "total_matches": len(matched_points),

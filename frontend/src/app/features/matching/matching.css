@@ -232,3 +232,31 @@
   0% { top: 0; }
   100% { top: 100%; }
 }
+
+
+/* =========================
+   RESPONSE CARD
+========================= */
+
+.response-card{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-top: 20px;
+  padding: 16px;
+  border-radius: 10px;
+  background: rgba(255,255,255,.05);
+  color: white;
+}
+
+.response-icon{
+  margin-right: 10px;
+}
+
+.response-card.success-card{
+  border-left: 4px solid #4caf50;
+}
+
+.response-card.error-card{
+  border-left: 4px solid #f44336;
+}
