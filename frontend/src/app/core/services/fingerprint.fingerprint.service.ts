@@ -32,30 +32,7 @@ export class FingerprintService {
   }
 
   // -------------------------
-  // MATCH (UPLOAD FOR SEARCH)
-  // -------------------------
-  matchFingerprint(file: File) {
-    const formData = new FormData();
-    formData.append('file', file);
-
-    return this.http.post(`${this.api}/fingerprints/match`, formData);
-  }
-
-  // -------------------------
-  // ADMIN UPLOAD (image + subject)
-  // -------------------------
-  Fingerprint(externalId: number, file: File) {
-    const formData = new FormData();
-    formData.append('file', file);
-
-    return this.http.post(
-      `${this.api}/fingerprints/admin/upload?external_id=${externalId}`,
-      formData,
-    );
-  }
-
-  // -------------------------
-  // UPLOAD FINGERPRINT
+  // ADMIN UPLOAD FINGERPRINT
   // -------------------------
   uploadFingerprint(fingerprint: FingerprintCreate): Observable<any> {
     const data = new FormData();
@@ -67,7 +44,7 @@ export class FingerprintService {
   }
 
   // -------------------------
-  // DELETE
+  // ADMIN DELETE
   // -------------------------
   deleteFingerprint(id: number) {
     return this.http.delete(`${this.api}/fingerprints/admin/delete/id/${id}`);

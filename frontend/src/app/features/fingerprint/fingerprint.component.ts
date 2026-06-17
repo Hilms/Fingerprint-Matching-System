@@ -41,6 +41,16 @@ import { FingerprintSubjectValidator } from '../../core/utils/fingerprint.subjec
   styleUrls: ['./fingerprint.css'],
 })
 export class FingerprintComponent implements OnInit {
+
+  constructor(
+      private subjectService: SubjectService,
+      private fingerprintService: FingerprintService,
+      private auth: AuthService,
+      private subjectValidator: FingerprintSubjectValidator,
+      private cdr: ChangeDetectorRef,
+  ) {}
+
+
   isAdmin: boolean = false;
 
   successVisible: boolean = false;
@@ -113,14 +123,6 @@ export class FingerprintComponent implements OnInit {
     filename: '',
     image: null as File | null,
   };
-
-  constructor(
-    private subjectService: SubjectService,
-    private fingerprintService: FingerprintService,
-    private auth: AuthService,
-    private subjectValidator: FingerprintSubjectValidator,
-    private cdr: ChangeDetectorRef,
-  ) {}
 
   ngOnInit(): void {
     this.isAdmin = this.auth.get_role() === 'admin';
