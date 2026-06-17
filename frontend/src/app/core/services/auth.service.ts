@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-
+import { Router } from '@angular/router';
 import { environment } from '../../../environment';
 
 import { LoginRequest, RegisterRequest, LoginResponse, RegisterResponse } from '../models/auth.models';
@@ -11,7 +11,7 @@ import { LoginRequest, RegisterRequest, LoginResponse, RegisterResponse } from '
 export class AuthService {
   private api = environment.apiUrl;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private router: Router) {}
 
   login(data: LoginRequest) {
     return this.http.post<LoginResponse>(`${this.api}/auth/login`, data);
@@ -54,6 +54,7 @@ export class AuthService {
   logout(): void {
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
+    this.router.navigate(['/auth']);
   }
 
   is_authenticated(): boolean {
