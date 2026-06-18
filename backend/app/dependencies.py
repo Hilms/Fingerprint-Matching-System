@@ -5,6 +5,7 @@ from app.services.fingerprint_service import FingerprintService
 from app.services.storage_service import StorageService
 from app.services.import_service import ImportService
 from app.services.user_service import UserService
+from app.services.dashboard_service import DashboardService
 
 from app.matching.fingerprint_embedder import FingerprintEmbedder
 from app.matching.fingerprint_minutiae_matcher import FingerprintMinutiaeMatcher
@@ -38,4 +39,6 @@ import_service = ImportService(
     fingerprint_service=fingerprint_service,
     storage_service=storage_service
 )
+
+dashboard_service = DashboardService(database=database)
 

@@ -10,8 +10,6 @@ CREATE TABLE users (
     created_at TIMESTAMP DEFAULT NOW()
 );
 
-CREATE EXTENSION IF NOT EXISTS vector;
-
 CREATE TABLE subjects (
     external_id INTEGER PRIMARY KEY,
     first_name TEXT,
