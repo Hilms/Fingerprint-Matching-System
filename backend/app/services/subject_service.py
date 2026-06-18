@@ -27,7 +27,7 @@ class SubjectService:
 
         # check if subject already exists
         existing = await self.subject_exists_by_external_id(
-            data["external_id"]
+            int(data["external_id"])
         )
 
         if existing:
@@ -65,7 +65,7 @@ class SubjectService:
         subject = await self.db.fetch_one(
             query=query,
             values={
-                "external_id": data.get("external_id"),
+                "external_id": int(data.get("external_id")),
                 "first_name": data.get("first_name"),
                 "last_name": data.get("last_name"),
                 "age": data.get("age"),
@@ -103,6 +103,40 @@ class SubjectService:
             return None
 
         return dict(subject)
+
+
+    async def get_subjects(self):
+
+        query = """
+            SELECT *
+            FROM subjects
+            ORDER BY external_id
+        """
+
+        subjects = await self.db.fetch_all(query)
+
+        return [
+            dict(subject)
+            for subject in subjects
+        ]
+
+    async def get_latest_subject_id(self):
+
+        query = """
+            SELECT external_id
+            FROM subjects
+            ORDER BY external_id DESC
+            LIMIT 1
+        """
+
+        row = await self.db.fetch_one(query)
+
+        if not row:
+            return {"latest_subject_id": None}
+
+        return {
+            "latest_subject_id" : row["external_id"]
+        }
 
 
     # SEARCH
@@ -202,7 +236,10 @@ class SubjectService:
                     values=values
                 )
 
-            return {"message": f"subject {external_id} updated"}
+            return {
+                "success" : True,
+                "message": f"subject {external_id} updated"
+                }
 
         except Exception as e:
 
@@ -287,7 +324,8 @@ class SubjectService:
                         pass
 
             return {
-                "message": f"subject {external_id} deleted permanently"
+                "success" : True,
+                "message": f"subject {external_id} and corresponding fingerprints successfully deleted"
             }
 
         except Exception as e:

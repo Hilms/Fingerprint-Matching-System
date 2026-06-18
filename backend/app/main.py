@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 import os
 
 from app.db.database import database
@@ -15,6 +16,18 @@ from app.api.fingerprint import router as fingerprint_router
 from app.dependencies import user_service
 
 app = FastAPI()
+
+origins = [
+    "http://localhost:" + os.getenv("FRONTEND_PORT")
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.on_event("startup")
 async def startup():

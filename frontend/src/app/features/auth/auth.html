@@ -1,0 +1,137 @@
+<div class="auth-wrapper">
+
+  <mat-card class="auth-card">
+
+    <mat-card-title>Fingerprint System</mat-card-title>
+
+    <!-- MODE TOGGLE -->
+    <div class="toggle">
+      <button mat-button type="button"
+              (click)="set_mode('login')"
+              [class.active]="mode==='login'">
+        Login
+      </button>
+
+      <button mat-button type="button"
+              (click)="set_mode('register')"
+              [class.active]="mode==='register'">
+        Register
+      </button>
+    </div>
+
+    <!-- LOGIN ERROR -->
+    <div *ngIf="mode === 'login' && login_error" class="error">
+      {{ login_error }}
+    </div>
+    <!-- USER CREATED -->
+    <div *ngIf="register_success" class="success">
+      {{ register_success }}
+    </div>
+
+    <!-- LOGIN -->
+    <form *ngIf="mode === 'login'" [formGroup]="loginForm" (ngSubmit)="login()">
+
+      <mat-form-field appearance="outline" class="full">
+        <mat-label>Username</mat-label>
+        <input matInput formControlName="username">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full">
+        <mat-label>Password</mat-label>
+        <input matInput type="password" formControlName="password">
+      </mat-form-field>
+
+      <button mat-raised-button color="primary" class="full"
+              [disabled]="loginForm.invalid">
+        Login
+      </button>
+
+    </form>
+
+    <!-- REGISTER ERROR -->
+    <div *ngIf="mode === 'register' && register_error" class="error">
+      {{ register_error }}
+    </div>
+
+    <!-- REGISTER -->
+    <form *ngIf="mode === 'register'" [formGroup]="registerForm" (ngSubmit)="register()">
+
+      <mat-form-field appearance="outline" class="full">
+        <mat-label>Username</mat-label>
+        <input matInput formControlName="username">
+
+        <mat-error *ngIf="registerForm.controls.username.hasError('required')">
+          Username is required
+        </mat-error>
+
+        <mat-error *ngIf="registerForm.controls.username.hasError('invalidUsername')">
+          Username must be 3–20 characters
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full">
+        <mat-label>Email</mat-label>
+        <input matInput formControlName="email">
+
+        <mat-error *ngIf="registerForm.controls.email.hasError('required')">
+          Email is required
+        </mat-error>
+
+        <mat-error *ngIf="registerForm.controls.email.hasError('email')">
+          Invalid email format
+        </mat-error>
+
+        <mat-error *ngIf="registerForm.controls.email.hasError('invalidEmail')">
+          Please enter a valid email address
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full">
+        <mat-label>Password</mat-label>
+        <input matInput type="password" formControlName="password">
+
+        <mat-error *ngIf="registerForm.controls.password.hasError('required')">
+          Password is required
+        </mat-error>
+
+        <mat-error *ngIf="registerForm.controls.password.hasError('minlength')">
+          Password must be at least 6 characters
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full">
+        <mat-label>First Name</mat-label>
+        <input matInput formControlName="first_name">
+
+        <mat-error *ngIf="registerForm.controls.first_name.hasError('required')">
+          First name is required
+        </mat-error>
+
+        <mat-error *ngIf="registerForm.controls.first_name.hasError('invalidName')">
+          Only letters are allowed
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full">
+        <mat-label>Last Name</mat-label>
+        <input matInput formControlName="last_name">
+
+        <mat-error *ngIf="registerForm.controls.last_name.hasError('required')">
+          Last name is required
+        </mat-error>
+
+        <mat-error *ngIf="registerForm.controls.last_name.hasError('invalidName')">
+          Only letters are allowed
+        </mat-error>
+      </mat-form-field>
+
+      <button mat-raised-button color="accent" class="full"
+              [disabled]="registerForm.invalid">
+        Register
+      </button>
+
+    </form>
+
+  </mat-card>
+
+</div>

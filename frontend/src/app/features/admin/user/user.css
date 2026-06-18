@@ -1,0 +1,144 @@
+.management-card,
+.edit-card,
+.password-card,
+.add-user-card {
+  margin-top: 20px;
+  padding: 24px;
+  background: rgba(255,255,255,.05);
+  color: white;
+}
+
+.edit-card,
+.add-user-card{
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.edit-card input,
+.edit-card select,
+.add-user-card select,
+.add-user-card input{
+  padding: 10px;
+  border-radius: 8px;
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.2);
+  color: white;
+}
+
+
+/*
+  SEARCH BAR
+*/
+.search-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.search-row input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.2);
+  color: white;
+}
+
+/*
+  USER TABLE
+*/
+table {
+  width: 100%;
+}
+
+.mat-mdc-table {
+  background: transparent;
+}
+
+.mat-mdc-header-cell {
+  color: white;
+  font-weight: 600;
+}
+
+.mat-mdc-cell {
+  color: rgba(255,255,255,.85);
+}
+
+.empty-state {
+  text-align: center;
+  opacity: .7;
+}
+
+#edit_active_status{
+  display: flex;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.card-header h2 {
+  margin: 0;
+  color: white;
+}
+
+/*
+ RESET PASSWORD
+*/
+.reset_password_input_container{
+  display: flex;
+  flex-direction: column;
+  width: 50%;
+}
+
+.validation {
+  font-size: 12px;
+  margin-bottom: 10px;
+  margin-top: -12px;
+  margin-left: 5px;
+}
+.error {
+  color: #f44336;
+}
+.success {
+  color: #4caf50;
+}
+
+/*
+ DISPLAY RESPONSE MSG
+*/
+.response-card{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-top: 20px;
+  padding: 16px;
+  border-radius: 10px;
+  background: rgba(255,255,255,.05);
+  color: white;
+}
+.response-icon{
+  margin-right: 10px;
+}
+
+.response-card.success-card{
+  border-left: 4px solid #4caf50;
+}
+
+.response-card.error-card{
+  border-left: 4px solid #f44336;
+}
+
+
+/*
+  GENERAL
+*/
+.buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}

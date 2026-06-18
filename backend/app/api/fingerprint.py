@@ -1,5 +1,6 @@
-from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
+from fastapi import APIRouter, Depends, UploadFile, File, Form, HTTPException
 from pydantic import BaseModel
+import json
 
 from app.security.auth import get_current_user
 from app.security.permission import require_role
@@ -24,19 +25,38 @@ class FingerprintCreate(BaseModel):
     feature_vector: str
 
 
+@router.get("/all")
+async def get_fingerprints(
+    user=Depends(get_current_user)
+):
+    return await fingerprint_service.get_fingerprints()
+
+@router.get("/image/{filename}")
+async def get_fingerprint_img(
+    filename: str,
+    user=Depends(get_current_user)
+):
+    return await fingerprint_service.get_fingerprint_img(filename)
+
 
 # SEARCH
 @router.get("/search")
 async def search_fingerprints(
-    q: str,
+    query: str,
     user=Depends(get_current_user)
 ):
 
-    return await fingerprint_service.search_fingerprints(q)
+    return await fingerprint_service.search_fingerprints(query)
 
+@router.get("/id/{external_id}")
+async def get_fingerprints_by_subject_id(
+    external_id: int,
+    user=Depends(get_current_user)
+):
+    return await fingerprint_service.get_fingerprints_by_subject_id(external_id)
 
 # METADATA
-@router.get("/{fingerprint_id}")
+@router.get("/metadata/id/{fingerprint_id}")
 async def get_metadata(
     fingerprint_id: int,
     user=Depends(get_current_user)
@@ -47,9 +67,20 @@ async def get_metadata(
     )
 
 
-# GET SUBJECT FROM FINGERPRINT
-@router.get("/{subject_external_id}/subject")
-async def get_subject(
+@router.get("/subject/id/{subject_external_id}")
+async def get_subject_fingerprint(
+    subject_external_id: int,
+    user=Depends(get_current_user)
+):
+
+    return await fingerprint_service.get_fingerprint_subject(
+        subject_external_id
+    )
+
+
+# GET SUBJECT & FINGERPRINT FOR MATCHING
+@router.get("/fingerprint_subject/id/{subject_external_id}")
+async def get_fingerprint_subject(
     subject_external_id: int,
     user=Depends(get_current_user)
 ):
@@ -75,16 +106,17 @@ async def match_fingerprint(
     return await fingerprint_service.match_fingerprint(file=file)
 
 
-# UPLOAD (subject + fingerprint in one step)
+# UPLOAD (subject & fingerprint)
 @router.post("/admin/upload")
 async def upload_fingerprint(
-    external_id: int,
-    file: UploadFile = File(...),
+    external_id: int | None = Form(None),
+    subject_data: str | None = Form(None),
+    file: UploadFile | None = File(None),
     user=Depends(get_current_user),
     _=Depends(require_role("admin"))
 ):
 
-    if file.content_type not in ALLOWED_TYPES:
+    if file and file.content_type not in ALLOWED_TYPES:
         raise HTTPException(
             status_code=400,
             detail="File must be an image"
@@ -92,25 +124,13 @@ async def upload_fingerprint(
 
     return await fingerprint_service.upload_fingerprint(
         file=file,
-        external_id=external_id
-    )
-
-
-# MANUAL CREATE FINGERPRINT (import / UI use case)
-@router.post("/admin")
-async def create_fingerprint(
-    data: FingerprintCreate,
-    user=Depends(get_current_user),
-    _=Depends(require_role("admin"))
-):
-
-    return await fingerprint_service.create_fingerprint(
-        data.dict()
+        external_id=external_id,
+        subject_data=json.loads(subject_data)
     )
 
 
 #DELETE
-@router.delete("/admin/{fingerprint_id}")
+@router.delete("/admin/delete/id/{fingerprint_id}")
 async def delete_fingerprint(
     fingerprint_id: int,
     user=Depends(get_current_user),

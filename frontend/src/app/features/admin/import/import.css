@@ -1,0 +1,122 @@
+
+.import-wrapper {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  min-height: 100vh;
+  overflow-y: auto;
+  color: #e0e0e0;
+}
+
+.import-card {
+  width: 100%;
+  padding: 24px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+  margin-top: 20px;
+}
+
+h2 {
+  margin-bottom: 16px;
+  color: #ffffff;
+}
+
+h3 {
+  margin-top: 20px;
+  margin-bottom: 10px;
+  color: #f5f5f5;
+}
+
+/* INFO BOX */
+.info-box {
+  background: rgba(255, 255, 255, 0.05);
+  border-left: 4px solid #4caf50;
+  padding: 16px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.info-box code {
+  background: rgba(0, 0, 0, 0.4);
+  padding: 2px 6px;
+  border-radius: 4px;
+  display: inline-block;
+  margin-top: 4px;
+}
+
+/* STATUS BOX */
+.status-box {
+  margin-top: 20px;
+  padding: 16px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border-left: 4px solid #2196f3;
+}
+
+/* RESULT BOX */
+.result-box {
+  margin-top: 20px;
+  padding: 16px;
+  border-radius: 10px;
+  background: rgba(76, 175, 80, 0.1);
+  border-left: 4px solid #4caf50;
+}
+
+/* INPUTS */
+input[type="file"] {
+  margin: 8px 0 12px 0;
+  color: #ccc;
+}
+
+/* BUTTON */
+.full {
+  width: 100%;
+  margin-top: 16px;
+}
+
+/* SMALL TEXT */
+p {
+  font-size: 14px;
+  margin: 6px 0;
+}
+
+/* HIGHLIGHT STATES */
+strong {
+  color: #ffffff;
+}
+
+
+/* Dismiss button */
+.dismiss-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+
+  background: transparent;
+  border: none;
+
+  font-size: 20px;
+  font-weight: 900;
+  color: #000000;
+
+  cursor: pointer;
+
+  width: 32px;
+  height: 32px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 6px;
+  transition: background 0.2s ease;
+}
+
+/* hover effect */
+.dismiss-btn:hover {
+  background: rgba(0, 0, 0, 0.1);
+}

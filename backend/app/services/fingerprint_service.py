@@ -1,4 +1,6 @@
 from fastapi import HTTPException
+from fastapi.responses import StreamingResponse
+import mimetypes
 import cv2
 import numpy as np
 
@@ -26,7 +28,9 @@ class FingerprintService:
 
 
     def load_image(self, source):
+        #  --> currently passing raw bytes
 
+        # upload file case
         if hasattr(source, "file"):
 
             file_bytes = source.file.read()
@@ -45,10 +49,13 @@ class FingerprintService:
 
             return image
 
-        return cv2.imread(
-            source,
-            cv2.IMREAD_GRAYSCALE
-        )
+        # raw bytes case (file.file)
+        if isinstance(source, (bytes, bytearray)):
+            image_array = np.frombuffer(source, np.uint8)
+            return cv2.imdecode(image_array, cv2.IMREAD_GRAYSCALE)
+
+        # file path case
+        return cv2.imread(source, cv2.IMREAD_GRAYSCALE)
 
 
     def create_embedding(self, source):
@@ -70,6 +77,7 @@ class FingerprintService:
         # format for storing vector in db
         return "[" + ",".join(str(x) for x in vec) + "]"
 
+
     # UPLOAD
     async def upload_fingerprint(
         self,
@@ -77,6 +85,9 @@ class FingerprintService:
         external_id: int = None,
         subject_data: dict = None
     ):
+
+        if external_id is not None:
+            external_id = int(external_id)
 
         # resolve subject (existing or create new)
         subject = None
@@ -112,12 +123,13 @@ class FingerprintService:
         if file is None:
 
             return {
-                "message": "subject created",
-                "subject": subject
+                "success": True,
+                "message": f"Subject {subject.external_id} successfully created"
             }
 
         # case (new)subject and fingerprint
         filename = file.filename
+        file_bytes = file.file.read()
 
         fingerprint_parser = FingerprintParser()
 
@@ -133,11 +145,9 @@ class FingerprintService:
             )
 
         # compute embedding
-
-        embedding = self.create_embedding(file)
+        embedding = self.create_embedding(file_bytes)
 
         # check duplicate fingerprints
-
         existing_fingerprint = await self.find_duplicate_fingerprint(
             embedding
         )
@@ -157,7 +167,7 @@ class FingerprintService:
         try:
 
             # upload image to storage
-
+            file.file.seek(0)
             image_url = self.storage_service.upload_image(
                 file=file,
                 object_path=filename
@@ -170,19 +180,18 @@ class FingerprintService:
                 # create fingerprint entry
 
                 fingerprint = await self.create_fingerprint({
-                    "subject_external_id": subject["external_id"],
-                    "image_url": image_url,
-                    "sex": meta["sex"],
-                    "hand": meta["hand"],
-                    "finger": meta["finger"],
-                    "filename": filename,
-                    "feature_vector": embedding
-                })
+                                    "subject_external_id": subject['external_id'],
+                                    "image_url": image_url,
+                                    "sex": meta["sex"],
+                                    "hand": meta["hand"],
+                                    "finger": meta["finger"],
+                                    "filename": filename,
+                                    "feature_vector": embedding
+                                })
 
             return {
-                "message": "fingerprint uploaded",
-                "subject": subject,
-                "fingerprint": fingerprint
+                "success": True,
+                "message": "Fingerprint upload was successful"
             }
 
         except Exception as e:
@@ -200,6 +209,7 @@ class FingerprintService:
                 status_code=500,
                 detail=str(e)
             )
+
 
     # CREATE
     async def create_fingerprint(
@@ -255,6 +265,42 @@ class FingerprintService:
         )
 
         return dict(fingerprint)
+
+    # GET
+    async def get_fingerprints(self):
+
+        query = """
+            SELECT *
+            FROM fingerprints
+            ORDER BY subject_external_id
+        """
+
+        fingerprints = await self.db.fetch_all(query)
+
+        return [
+            dict(fingerprint)
+            for fingerprint in fingerprints
+        ]
+
+    async def get_fingerprints_by_subject_id(self, external_id):
+
+        query = """
+            SELECT *
+            FROM fingerprints
+            WHERE subject_external_id = :external_id
+        """
+
+        fingerprints = await self.db.fetch_all(
+            query=query,
+            values={
+                "external_id": external_id
+            }
+        )
+
+        return [
+            dict(fingerprint)
+            for fingerprint in fingerprints
+        ]
 
     # DELETE
     async def delete_fingerprint(
@@ -327,7 +373,8 @@ class FingerprintService:
             )
 
         return {
-            "message": f"fingerprint {fingerprint_id} deleted"
+            "success" : True,
+            "message": f"fingerprint {fingerprint_id} successfully deleted"
         }
 
 
@@ -477,7 +524,10 @@ class FingerprintService:
         # create retrieval embedding
         # this embedding is used only for:
         # pgvector similarity retrieval
-        embedding = self.create_embedding(file)
+        file_bytes = file.file.read()
+        file.file.seek(0)
+
+        embedding = self.create_embedding(file_bytes)
 
         # search nearest fingerprint candidates
         query = """
@@ -500,6 +550,7 @@ class FingerprintService:
             }
         )
 
+
         if not candidates:
             return []
 
@@ -513,10 +564,10 @@ class FingerprintService:
 
             try:
 
-                # retrieve image bytes from storage
-
+                # retrieve image from storage
                 try:
-                    image_bytes = self.storage_service.get_image(candidate["image_url"])
+                    image = self.storage_service.get_image(candidate["image_url"])
+                    image_bytes = image.read()
                 except Exception:
                     continue
 
@@ -543,9 +594,8 @@ class FingerprintService:
             except Exception:
                 continue
 
-
         # minutiae verification
-        query_image = self.load_image(file)
+        query_image = self.load_image(file_bytes)
 
         results = self.fingerprint_minutiae_matcher.match_candidates(
             query_image,
@@ -568,7 +618,6 @@ class FingerprintService:
 
             subject_external_id = result["subject_external_id"]
 
-            # CACHE SUBJECT LOOKUP (avoid repeated DB calls)
             if subject_external_id not in subject_cache:
                 subject_cache[subject_external_id] = await self.get_fingerprint_subject(
                     subject_external_id
@@ -579,11 +628,51 @@ class FingerprintService:
             enriched_results.append({
                 "fingerprint": fingerprint_metadata,
                 "subject": subject,
-                "accuracy": result["accuracy"],
-                "total_matches": result["total_matches"],
-                "query_minutiae_count": result["query_minutiae_count"],
-                "candidate_minutiae_count": result["candidate_minutiae_count"],
-                "matched_points": result["matched_points"]
+                "result": result
             })
 
-        return enriched_results
+        if len(enriched_results) == 0:
+            return {
+                "success": False,
+                "message": "No Match Found in Database",
+                "data": []
+            }
+
+        return {
+            "success": True,
+            "message": "Match Found",
+            "data": enriched_results
+        }
+
+
+    async def get_by_filename(self, filename: str):
+        query = """
+            SELECT id
+            FROM fingerprints
+            WHERE filename = :filename
+            LIMIT 1
+        """
+
+        result = await self.db.fetch_one(
+            query=query,
+            values={"filename": filename}
+        )
+
+        return result is not None
+
+    async def get_fingerprint_img(self, filename: str):
+        # return self.storage_service.get_signed_url(filename)
+        image = self.storage_service.get_image(filename)
+
+        media_type, _ = mimetypes.guess_type(filename)
+
+        def iterfile():
+            for chunk in image.stream(32 * 1024):
+                yield chunk  # MUST be bytes
+
+        return StreamingResponse(
+            iterfile(),
+            media_type=media_type or "application/octet-stream"
+        )
+
+

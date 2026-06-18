@@ -1,0 +1,276 @@
+/* =========================
+   GLOBAL PAGE
+========================= */
+
+.page-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px;
+}
+
+/* =========================
+   MAT CARD GLASS STYLE
+========================= */
+
+.glass-card.mat-mdc-card {
+  background: rgba(255,255,255,0.05) !important;
+  color: white !important;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 12px;
+}
+
+.glass-card {
+  padding: 20px 24px;
+  box-sizing: border-box;
+}
+
+/* =========================
+   IMAGE CARD LAYOUT
+========================= */
+
+.image-card {
+  height: calc(100vh - 40px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* IMPORTANT */
+}
+
+/* =========================
+   PANELS WRAPPER
+========================= */
+
+.image-panels {
+  display: flex;
+  gap: 20px;
+  flex: 1;
+  min-height: 0; /* IMPORTANT */
+}
+
+/* =========================
+   SINGLE PANEL
+========================= */
+
+.image-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;   /* IMPORTANT */
+  overflow: hidden; /* IMPORTANT */
+}
+
+/* =========================
+   TITLE
+========================= */
+
+.panel-title {
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+/* =========================
+   IMAGE CONTAINER
+========================= */
+
+.image-container {
+  flex: 1;
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 0;
+  overflow: hidden;
+
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 10px;
+}
+
+/* =========================
+   IMAGE
+========================= */
+
+.panel-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* IMPORTANT for correct coordinates */
+  display: block;
+}
+
+/* =========================
+   CANVAS OVERLAY
+========================= */
+
+.overlay-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  width: 100%;
+  height: 100%;
+
+  pointer-events: none;
+}
+
+
+
+/* =========================
+   PLACEHOLDERS
+========================= */
+
+.upload-placeholder,
+.result-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  opacity: 0.8;
+}
+
+/* =========================
+   ACTION ROW
+========================= */
+
+.action-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+  width: 100%;
+}
+
+.action-btn {
+  flex: 1;
+  height: 42px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(255,255,255,0.08);
+  color: white;
+}
+
+/* =========================
+   RESET BUTTON
+========================= */
+
+.reset-overlay {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+
+  background: rgba(0,0,0,0.4);
+  color: white;
+  z-index: 5;
+}
+
+/* =========================
+   ACCURACY CARD
+========================= */
+
+.accuracy-card {
+  margin-top: 10px;
+  padding: 10px;
+
+  background: rgba(76,175,80,0.15);
+  border-left: 4px solid #4caf50;
+
+  border-radius: 8px;
+}
+
+/* =========================
+   STATS
+========================= */
+
+.result-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+
+  margin-top: 10px;
+}
+
+.stat-item {
+  padding: 10px;
+  border-radius: 8px;
+
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.12);
+
+  display: flex;
+  justify-content: space-between;
+}
+
+/* =========================
+   INPUT SECTION
+========================= */
+
+.data-section {
+  display: flex;
+  gap: 20px;
+}
+
+.data-block {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.data-block input {
+  padding: 10px;
+  border-radius: 8px;
+
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: white;
+}
+
+/* =========================
+   SCAN LINE
+========================= */
+
+.scan-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 3px;
+
+  background: cyan;
+  box-shadow: 0 0 10px cyan;
+
+  animation: scan 2s linear infinite;
+}
+
+@keyframes scan {
+  0% { top: 0; }
+  100% { top: 100%; }
+}
+
+/* =========================
+   RESPONSE CARD
+========================= */
+
+.response-card{
+  display: flex;
+  align-items: center;
+  margin-top: 20px;
+  padding: 16px;
+  border-radius: 10px;
+  background: rgba(255,255,255,.05);
+  color: white;
+}
+
+.response-icon{
+  margin-right: 10px;
+}
+
+.response-card.success-card{
+  border-left: 4px solid #4caf50;
+}
+
+.response-card.error-card{
+  border-left: 4px solid #f44336;
+}

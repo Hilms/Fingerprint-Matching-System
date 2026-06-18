@@ -1,0 +1,113 @@
+body{
+  background: #121212;
+}
+
+/* =========================================================
+   GLOBAL DARK INPUT THEME (Angular Material MDC)
+========================================================= */
+
+/* INPUT TEXT */
+.mat-mdc-input-element {
+  color: white !important;
+  caret-color: white !important;
+}
+
+/* LABEL */
+.mdc-floating-label {
+  color: rgba(255, 255, 255, 0.75) !important;
+}
+
+/* PLACEHOLDER */
+input::placeholder {
+  color: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* =========================================================
+   OUTLINE BASE STATE
+========================================================= */
+.mdc-notched-outline__leading,
+.mdc-notched-outline__notch,
+.mdc-notched-outline__trailing {
+  border-color: rgba(255, 255, 255, 0.35) !important;
+}
+
+/* HOVER */
+.mat-mdc-form-field:hover .mdc-notched-outline__leading,
+.mat-mdc-form-field:hover .mdc-notched-outline__notch,
+.mat-mdc-form-field:hover .mdc-notched-outline__trailing {
+  border-color: rgba(255, 255, 255, 0.75) !important;
+}
+
+/* FOCUS = WHITE */
+.mat-mdc-form-field.mat-focused .mdc-notched-outline__leading,
+.mat-mdc-form-field.mat-focused .mdc-notched-outline__notch,
+.mat-mdc-form-field.mat-focused .mdc-notched-outline__trailing {
+  border-color: #ffffff !important;
+}
+
+/* =========================================================
+   VALID / INVALID (AFTER ANGULAR MATERIAL STATE)
+========================================================= */
+
+/* VALID */
+.mat-mdc-form-field.mat-form-field-valid .mdc-notched-outline__leading,
+.mat-mdc-form-field.mat-form-field-valid .mdc-notched-outline__notch,
+.mat-mdc-form-field.mat-form-field-valid .mdc-notched-outline__trailing {
+  border-color: #199c0b !important;
+}
+
+/* INVALID */
+.mat-mdc-form-field.mat-form-field-invalid .mdc-notched-outline__leading,
+.mat-mdc-form-field.mat-form-field-invalid .mdc-notched-outline__notch,
+.mat-mdc-form-field.mat-form-field-invalid .mdc-notched-outline__trailing {
+  border-color: #ff5252 !important;
+}
+
+/* ERROR TEXT */
+.mat-mdc-form-field-error {
+  color: #ff5252 !important;
+}
+
+/* =========================================================
+   BUTTONS (GLOBAL - SAFE)
+========================================================= */
+
+button.mat-mdc-raised-button {
+  border-radius: 10px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  height: 44px;
+  transition: all 0.2s ease;
+}
+
+/* PRIMARY (LOGIN STYLE) */
+button.mat-mdc-raised-button.mat-primary {
+  background-color: #ffffff !important;
+  color: #121212 !important;
+}
+
+button.mat-mdc-raised-button.mat-primary:hover {
+  background-color: #e6e6e6 !important;
+}
+
+/* ACCENT (REGISTER STYLE) */
+button.mat-mdc-raised-button.mat-accent {
+  background-color: transparent !important;
+  border: 1px solid rgba(255, 255, 255, 0.6) !important;
+  color: white !important;
+}
+
+button.mat-mdc-raised-button.mat-accent:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  border-color: white !important;
+}
+
+/* DISABLED */
+button.mat-mdc-raised-button:disabled {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  color: rgba(255, 255, 255, 0.4) !important;
+}
+
+mat-mdc-form-field-subscript-wrapper mat-mdc-form-field-bottom-align {
+  height:0px;
+}

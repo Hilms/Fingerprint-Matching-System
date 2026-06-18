@@ -1,0 +1,34 @@
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+
+    <h3>Fingerprint System</h3>
+
+    <!-- common -->
+    <a routerLink="/app/dashboard">Dashboard</a>
+    <a routerLink="/app/matching">Fingerprint Matching</a>
+    <a routerLink="/app/fingerprints">Fingerprint DB</a>
+
+    <!-- admin only -->
+    <ng-container *ngIf="role === 'admin'">
+
+      <hr>
+
+      <a routerLink="/app/admin/user">User Management</a>
+      <a routerLink="/app/admin/import">Fingerprint Import</a>
+
+    </ng-container>
+
+    <hr>
+
+    <button id="logout_btn" (click)="logout()">Logout</button>
+
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="content">
+    <router-outlet></router-outlet>
+  </div>
+
+</div>

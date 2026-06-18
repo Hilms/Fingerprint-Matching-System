@@ -1,7 +1,14 @@
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 
-from app.security.auth import hash_password, verify_password, create_access_token, get_current_user
+from app.security.auth import (
+    hash_password,
+    verify_password,
+    create_access_token,
+    create_refresh_token,
+    decode_token,
+    get_current_user
+)
 from app.security.permission import require_role
 
 from app.dependencies import user_service
@@ -24,23 +31,37 @@ class LoginRequest(BaseModel):
     password: str
 
 
+class RefreshRequest(BaseModel):
+    refresh_token: str
+
+
 @router.post("/register")
 async def register(data: RegisterRequest):
 
-    existing = await user_service.get_user(
+    existing_user = await user_service.get_user(
             data.username
     )
 
-    if existing:
+    if existing_user:
         raise HTTPException(
             status_code=409,
             detail="user already exists"
         )
 
+    existing_mail = await user_service.get_user_mail(
+        data.email
+    )
+
+    if existing_mail:
+        raise HTTPException(
+           status_code=409,
+           detail="email already exists"
+        )
+
     await user_service.create_user(data)
 
     return {
-        "message": "user created"
+        "message": "user successfully created"
     }
 
 
@@ -55,7 +76,7 @@ async def login(data: LoginRequest):
 
         raise HTTPException(
             status_code=401,
-            detail="wrong username"
+            detail="Invalid username or password"
         )
 
     if not user["is_active"]:
@@ -74,16 +95,24 @@ async def login(data: LoginRequest):
 
         raise HTTPException(
             status_code=401,
-            detail="wrong password"
+            detail="Invalid username or password"
         )
 
-    token = create_access_token({
+    access_token = create_access_token({
         "sub": user["username"],
-        "role": user["role"]
+        "role": user["role"],
+        "type": 'access'
+    })
+
+    refresh_token = create_refresh_token({
+        "sub": user["username"],
+        "role": user["role"],
+        "type": 'refresh'
     })
 
     return {
-        "access_token": token,
+        "access_token": access_token,
+        "refresh_token": refresh_token,
         "token_type": "bearer"
     }
 
@@ -98,3 +127,25 @@ async def me(
     user=Depends(get_current_user)
 ):
     return user
+
+@router.post("/refresh")
+async def refresh(data: RefreshRequest):
+
+    try:
+        payload = decode_token(data.refresh_token)
+    except:
+        raise HTTPException(status_code=401, detail="Invalid refresh token")
+
+    # IMPORTANT: ensure it's actually a refresh token
+    if payload["type"] != "refresh":
+        raise HTTPException(status_code=401, detail="Wrong token type")
+
+    new_access_token = create_access_token({
+        "sub": payload["sub"],
+        "role": payload["role"],
+        "type": 'access'
+    })
+
+    return {
+        "access_token": new_access_token
+    }

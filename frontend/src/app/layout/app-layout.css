@@ -1,0 +1,52 @@
+.layout {
+  display: flex;
+  height: 100vh;
+}
+
+.layout {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+/* SIDEBAR */
+.sidebar {
+  width: auto;
+  height: 100vh;
+  background: #121212;
+  color: white;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow: hidden;
+}
+
+
+.sidebar h3 {
+  margin-bottom: 10px;
+}
+
+.sidebar a {
+  color: white;
+  text-decoration: none;
+  padding: 6px;
+  border-radius: 6px;
+}
+
+.sidebar a:hover {
+  background: #1f2937;
+}
+
+/* MAIN CONTENT AREA */
+.content {
+  flex: 1;
+  height: 100vh;
+  overflow-y: auto;
+  background: #121212;
+}
+
+#logout_btn {
+  cursor: pointer;
+}

@@ -1,0 +1,210 @@
+<div class="page-container">
+
+  <!-- =========================
+       IMAGE CARD (FULL SCREEN)
+  ========================= -->
+
+  <mat-card class="glass-card image-card">
+
+    <div class="card-header">
+      <h2>Fingerprint Search</h2>
+    </div>
+
+    <div class="image-panels">
+
+      <!-- LEFT -->
+      <div class="image-panel">
+
+        <div class="panel-title">Upload Fingerprint</div>
+
+        <div class="image-container">
+
+          <div *ngIf="isSearching" class="scan-line"></div>
+          <!-- IMAGE VIEW -->
+          <ng-container *ngIf="uploadedImage; else uploadTpl">
+
+              <img #queryImg [src]="uploadedImage" class="panel-image">
+              <canvas
+                #queryCanvas
+                class="overlay-canvas">
+              </canvas>
+
+            <!-- RESET OVERLAY BUTTON -->
+            <button
+              *ngIf="!isSearching && !resultImage"
+              mat-icon-button
+              class="reset-overlay"
+              (click)="resetUpload()"
+              matTooltip="Reset"
+            >
+              <mat-icon>close</mat-icon>
+            </button>
+
+          </ng-container>
+
+          <!-- UPLOAD TEMPLATE -->
+          <ng-template #uploadTpl>
+
+            <div class="upload-placeholder">
+
+              <mat-icon>fingerprint</mat-icon>
+
+              <p>Upload fingerprint</p>
+
+              <input
+                #fileInput
+                hidden
+                type="file"
+                accept=".png,.jpg,.jpeg,.bmp"
+                (change)="onFingerprintSelected($event)"
+              >
+
+              <button
+                mat-raised-button
+                color="primary"
+                (click)="openFileDialog()"
+              >
+                Upload
+              </button>
+
+            </div>
+
+          </ng-template>
+
+        </div>
+
+        <!-- ACTION BUTTONS -->
+        <div class="action-row">
+
+          <button
+            mat-raised-button
+            class="action-btn"
+            [disabled]="!uploadedImage || resultImage"
+            (click)="searchFingerprint()"
+          >
+            Search
+          </button>
+
+          <button
+            mat-raised-button
+            class="action-btn"
+            [disabled]="!resultImage"
+            (click)="reset()"
+          >
+            Reset
+          </button>
+
+        </div>
+
+      </div>
+
+      <!-- RIGHT -->
+      <div class="image-panel">
+
+        <div class="panel-title">Result</div>
+
+        <div class="image-container">
+
+          <ng-container *ngIf="resultImage; else resultTpl">
+
+
+              <img #candidateImg [src]="resultImage" class="panel-image" (load)="onCandidateImageLoad()">
+              <canvas
+                #candidateCanvas
+                class="overlay-canvas">
+              </canvas>
+
+
+          </ng-container>
+
+          <ng-template #resultTpl>
+            <div class="result-placeholder">
+              <mat-icon>image_search</mat-icon>
+              <p>No result yet</p>
+            </div>
+          </ng-template>
+
+        </div>
+
+        <div *ngIf="matchingResult" class="accuracy-card">
+          {{ matchingResult.accuracy | number:'1.1-2' }}% Match
+        </div>
+
+        <mat-card
+          *ngIf="successVisible"
+          class="response-card"
+          [class.success-card]="successState === 'success'"
+          [class.error-card]="successState === 'error'"
+        >
+          <mat-icon class="response-icon">
+            {{ successState === 'success' ? 'check_circle' : 'cancel' }}
+          </mat-icon>
+
+          <span>{{ successMessage }}</span>
+        </mat-card>
+
+      </div>
+
+    </div>
+
+  </mat-card>
+
+
+  <mat-card *ngIf="matchingResult" class="glass-card data-card">
+
+    <div class="result-stats">
+
+      <div class="stat-item">
+        <span>Query Minutiae</span>
+        <b>{{ matchingResult.query_minutiae_count }}</b>
+      </div>
+
+      <div class="stat-item">
+        <span>Candidate Minutiae</span>
+        <b>{{ matchingResult.candidate_minutiae_count }}</b>
+      </div>
+
+      <div class="stat-item">
+        <span>Total Matches</span>
+        <b>{{ matchingResult.total_matches }}</b>
+      </div>
+
+    </div>
+  </mat-card>
+
+  <!-- =========================
+       DATA CARD (INPUTS)
+  ========================= -->
+
+  <mat-card class="glass-card data-card">
+
+    <div class="data-section">
+
+      <div class="data-block">
+        <h3>Subject Data</h3>
+
+        <input [value]="subject?.external_id" placeholder="Subject ID" disabled>
+        <input [value]="subject?.first_name" placeholder="First Name" disabled>
+        <input [value]="subject?.last_name" placeholder="Last Name" disabled>
+        <input [value]="subject?.age" placeholder="Age" disabled>
+        <input [value]="subject?.address" placeholder="Address" disabled>
+        <input [value]="subject?.city" placeholder="City" disabled>
+        <input [value]="subject?.country" placeholder="Country" disabled>
+        <input [value]="subject?.phone_number" placeholder="Phone Number" disabled>
+      </div>
+
+      <div class="data-block">
+        <h3>Fingerprint Data</h3>
+
+        <input [value]="fingerprint?.subject_external_id" placeholder="Subject ID" disabled>
+        <input [value]="fingerprint?.sex" placeholder="Sex" disabled>
+        <input [value]="fingerprint?.hand" placeholder="Hand" disabled>
+        <input [value]="fingerprint?.finger" placeholder="Finger" disabled>
+        <input [value]="fingerprint?.filename" placeholder="Filename" disabled>
+      </div>
+
+    </div>
+
+  </mat-card>
+
+</div>

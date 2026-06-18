@@ -54,6 +54,33 @@ class UserService:
         self,
         data
     ):
+        existing_user = await self.db.fetch_one(
+            query="""
+                SELECT username, email
+                FROM users
+                WHERE username = :username
+                   OR email = :email
+            """,
+            values={
+                "username": data.username,
+                "email": data.email,
+            }
+        )
+
+        if existing_user:
+
+            if existing_user["username"] == data.username:
+                return {
+                    "success": False,
+                    "message": f'Username "{data.username}" already exists'
+                }
+
+            if existing_user["email"] == data.email:
+                return {
+                    "success": False,
+                    "message": f'Email "{data.email}" already exists'
+                }
+
         password_hash = hash_password(
             data.password
         )
@@ -86,9 +113,34 @@ class UserService:
             }
         )
 
+        return {
+            "success": True,
+            "message": f'{data.username} successfully created'
+        }
+
     # =========================
     # GET
     # =========================
+
+    async def get_all_users(self):
+
+        query = """
+            SELECT
+                id,
+                first_name,
+                last_name,
+                username,
+                email,
+                role,
+                is_active,
+                created_at
+            FROM users
+            ORDER BY username
+        """
+
+        users = await self.db.fetch_all(query)
+
+        return [dict(user) for user in users]
 
     async def get_user(
         self,
@@ -116,6 +168,28 @@ class UserService:
         )
 
         return dict(user) if user else None
+
+
+    async def get_user_mail(
+            self,
+            email: str
+        ):
+            query = """
+                SELECT
+                    email
+                FROM users
+                WHERE email = :email
+            """
+
+            mail = await self.db.fetch_one(
+                query=query,
+                values={
+                    "email": email
+                }
+            )
+
+            return dict(mail) if mail else None
+
 
     async def get_user_with_password(
         self,
@@ -160,6 +234,7 @@ class UserService:
                 OR last_name ILIKE :query
                 OR username ILIKE :query
                 OR email ILIKE :query
+                OR role ILIKE :query
         """
 
         users = await self.db.fetch_all(
@@ -218,19 +293,14 @@ class UserService:
 
         update_data["current_username"] = username
 
-        try:
-            await self.db.execute(
+        await self.db.execute(
                 query=sql,
                 values=update_data
-            )
-        except Exception:
-            raise HTTPException(
-                status_code=409,
-                detail="username or email already exists"
-            )
+        )
 
         return {
-            "message": f"{username} updated"
+            "success": True,
+            "message": f"{username} successfully updated"
         }
 
     # =========================
@@ -281,7 +351,8 @@ class UserService:
         )
 
         return {
-            "message": "password updated"
+            "success": True,
+            "message": "Password updated successfully"
         }
 
     async def admin_reset_password(
@@ -318,7 +389,8 @@ class UserService:
         )
 
         return {
-            "message": f"{username} password reset"
+            "success": True,
+            "message": f"Reset password successfully for {username}"
         }
 
     # =========================
@@ -358,5 +430,6 @@ class UserService:
         )
 
         return {
-            "message": f"{username} deleted"
+            "success": True,
+            "message": f"{username} successfully deleted"
         }

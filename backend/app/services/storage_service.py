@@ -1,5 +1,6 @@
 from app.storage.minio_client import minio_client, MINIO_BUCKET
 from io import BytesIO
+from datetime import timedelta
 
 class StorageService:
 
@@ -7,12 +8,10 @@ class StorageService:
     def upload_image(self, file, object_path: str):
 
         # upload image to MinIO
-
         if hasattr(file, "file"):
-            # uploaded file
             file_data = file.file
         else:
-            # path local storage
+            # filepath reads
             file_data = open(file, "rb")
 
         minio_client.put_object(
@@ -46,6 +45,7 @@ class StorageService:
                 "path": object_path
             }
 
+
     def get_image(self, object_path: str):
 
         try:
@@ -54,19 +54,21 @@ class StorageService:
                 object_name=object_path
             )
 
-            return response.read()
+            # return response.read()
+            return response
 
         except Exception as e:
             raise RuntimeError(f"Failed to fetch image from MinIO: {e}")
 
-    # SIGNED URL TO IMAGE
+
+    # SIGNED URL TO IMAGE ? presigned URLs are failing because of a Docker hostname mismatch
     def get_signed_url(self, object_path: str):
 
         try:
             url = minio_client.presigned_get_object(
                 bucket_name=MINIO_BUCKET,
                 object_name=object_path,
-                expires=3600
+                expires=timedelta(seconds=3600)
             )
 
             return {
