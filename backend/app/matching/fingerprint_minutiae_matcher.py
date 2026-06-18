@@ -71,7 +71,11 @@ class FingerprintMinutiaeMatcher:
             candidates
         ):
 
-            query_minutiae = self.minutiae_embedder(query_image)
+            image_size_query = {"query" : {}}
+
+            query_minutiae = self.minutiae_embedder(query_image) or []
+
+            qh, qw = query_image.shape[:2]
 
             results = []
 
@@ -80,13 +84,15 @@ class FingerprintMinutiaeMatcher:
                 candidate_id = candidate["id"]
 
                 candidate_image = candidate["image"]
+                ch, cw = candidate_image.shape[:2]
+
+                image_sizes = {
+                    "query":{"height": qh, "width": qw} ,
+                    "candidate": {"height": ch, "width": cw}
+                }
 
                 # extract candidate minutiae
-                candidate_minutiae = (
-                    self.minutiae_embedder(
-                        candidate_image
-                    )
-                )
+                candidate_minutiae = self.minutiae_embedder(candidate_image) or []
 
                 if (
                     len(query_minutiae) == 0 or
@@ -109,10 +115,7 @@ class FingerprintMinutiaeMatcher:
                     )
 
                 # compute match score
-                total_possible = max(
-                    len(query_minutiae),
-                    len(candidate_minutiae)
-                )
+                total_possible = max(len(query_minutiae), len(candidate_minutiae), 1)
 
                 accuracy = (
                     len(matched_points) /
@@ -120,18 +123,19 @@ class FingerprintMinutiaeMatcher:
                 )
 
                 # filter out matchings under 80%
-                if accuracy > 0.8:
-                    results.append({
-                        "candidate_id": candidate_id,
-                        #"image": candidate_image,
-                        "subject_external_id": candidate.get("subject_external_id"),
-                        "accuracy": accuracy,
-                        "total_matches": len(matched_points),
-                        "query_minutiae_count": len(query_minutiae),
-                        "candidate_minutiae_count": len(candidate_minutiae),
-                        # used later for visualization
-                        "matched_points": matched_points
-                    })
+                #if accuracy > 0.5:
+                results.append({
+                    "candidate_id": candidate_id,
+                    "image_size": image_sizes,
+                    #"image": candidate_image,
+                    "subject_external_id": candidate.get("subject_external_id"),
+                    "accuracy": accuracy,
+                    "total_matches": len(matched_points),
+                    "query_minutiae_count": len(query_minutiae),
+                    "candidate_minutiae_count": len(candidate_minutiae),
+                    # used later for visualization
+                    "matched_points": matched_points
+                })
 
 
             # sort by best match
@@ -178,6 +182,8 @@ class FingerprintMinutiaeMatcher:
                 aligned.append({
                     "x": rotated_x + query_ref["x"],
                     "y": rotated_y + query_ref["y"],
+                    "original_x": minutia["x"],
+                    "original_y": minutia["y"],
                     "angle": minutia["angle"] + math.degrees(rotation_angle),
                     "type": minutia["type"]
                 })
@@ -190,7 +196,7 @@ class FingerprintMinutiaeMatcher:
                     best_score = score
                     best_aligned = aligned
 
-        return best_aligned
+        return best_aligned or candidate_minutiae
 
 
     def align_minutiae(
@@ -269,8 +275,11 @@ class FingerprintMinutiaeMatcher:
             aligned.append({
 
                 "x": final_x,
-
                 "y": final_y,
+
+                # original image coordinates
+                "original_x": minutia["x"],
+                "original_y": minutia["y"],
 
                 "type": minutia["type"],
 
@@ -356,29 +365,21 @@ class FingerprintMinutiaeMatcher:
                 matches.append({
 
                     "query": {
-
                         "x": query_point["x"],
-
                         "y": query_point["y"],
-
                         "angle": query_point["angle"],
-
                         "type": query_point["type"]
                     },
-
                     "candidate": {
-
-                        "x": candidate_point["x"],
-
-                        "y": candidate_point["y"],
-
+                        #"x": candidate_point["x"],
+                        #"y": candidate_point["y"],
+                        # coordinates on original fingerprint image
+                        "x": candidate_point.get("original_x", candidate_point["x"]),
+                        "y": candidate_point.get("original_y", candidate_point["y"]),
                         "angle": candidate_point["angle"],
-
                         "type": candidate_point["type"]
                     },
-
                     "distance": distance,
-
                     "angle_difference": angle_difference
                 })
 

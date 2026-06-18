@@ -20,11 +20,14 @@
         <div class="image-container">
 
           <div *ngIf="isSearching" class="scan-line"></div>
-
           <!-- IMAGE VIEW -->
           <ng-container *ngIf="uploadedImage; else uploadTpl">
 
-            <img [src]="uploadedImage" class="panel-image">
+              <img #queryImg [src]="uploadedImage" class="panel-image">
+              <canvas
+                #queryCanvas
+                class="overlay-canvas">
+              </canvas>
 
             <!-- RESET OVERLAY BUTTON -->
             <button
@@ -103,7 +106,15 @@
         <div class="image-container">
 
           <ng-container *ngIf="resultImage; else resultTpl">
-            <img [src]="resultImage" class="panel-image">
+
+
+              <img #candidateImg [src]="resultImage" class="panel-image" (load)="onCandidateImageLoad()">
+              <canvas
+                #candidateCanvas
+                class="overlay-canvas">
+              </canvas>
+
+
           </ng-container>
 
           <ng-template #resultTpl>
