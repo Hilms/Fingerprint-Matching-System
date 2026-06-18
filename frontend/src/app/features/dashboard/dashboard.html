@@ -1,10 +1,155 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>DASHBOARD</title>
-</head>
-<body>
-<h1>DASHBOARD</h1>
-</body>
-</html>
+<div class="page-container">
+
+  <mat-card class="dashboard-wrapper">
+
+    <h2>DASHBOARD</h2>
+
+    <!-- =========================
+         KPI CARDS
+    ========================= -->
+    <div class="kpi-grid">
+
+      <mat-card class="glass-card kpi-card">
+        <h3>Subjects</h3>
+        <div class="kpi-value">{{ data?.summary?.total_subjects }}</div>
+      </mat-card>
+
+      <mat-card class="glass-card kpi-card">
+        <h3>Fingerprints</h3>
+        <div class="kpi-value">{{ data?.summary?.total_fingerprints }}</div>
+      </mat-card>
+
+      <mat-card class="glass-card kpi-card">
+        <h3>Countries</h3>
+        <div class="kpi-value">{{ data?.summary?.total_countries }}</div>
+      </mat-card>
+
+      <mat-card class="glass-card kpi-card">
+        <h3>Cities</h3>
+        <div class="kpi-value">{{ data?.summary?.total_cities }}</div>
+      </mat-card>
+
+    </div>
+
+    <!-- =========================
+         MAIN CHARTS
+    ========================= -->
+    <div class="chart-grid">
+
+      <mat-card class="glass-card chart-card">
+        <h3>Gender Distribution</h3>
+        <div echarts [options]="genderChart"></div>
+      </mat-card>
+
+      <mat-card class="glass-card chart-card">
+        <h3>Age Distribution</h3>
+        <div echarts [options]="ageChart"></div>
+      </mat-card>
+
+    </div>
+
+    <!-- =========================
+         FINGER / HAND CHARTS
+    ========================= -->
+    <div class="chart-grid">
+
+      <mat-card class="glass-card chart-card">
+        <h3>Finger Types</h3>
+        <div echarts [options]="fingerChart"></div>
+      </mat-card>
+
+      <mat-card class="glass-card chart-card">
+        <h3>Hand Distribution</h3>
+        <div echarts [options]="handChart"></div>
+      </mat-card>
+
+    </div>
+
+    <!-- =========================
+         GEOGRAPHY
+    ========================= -->
+    <div class="chart-grid">
+
+      <mat-card class="glass-card chart-card">
+        <h3>Countries</h3>
+        <div echarts [options]="countryChart"></div>
+      </mat-card>
+
+      <mat-card class="glass-card chart-card">
+        <h3>Cities (Top 20)</h3>
+        <div echarts [options]="cityChart"></div>
+      </mat-card>
+
+    </div>
+
+    <!-- =========================
+         STACKED ANALYTICS
+    ========================= -->
+    <div class="chart-grid full">
+
+      <mat-card class="glass-card chart-card large">
+        <h3>Age + Gender</h3>
+        <div echarts [options]="ageGenderChart"></div>
+      </mat-card>
+
+    </div>
+
+    <div class="chart-grid full">
+
+      <mat-card class="glass-card chart-card large">
+        <h3>Country + Gender</h3>
+        <div echarts [options]="countryGenderChart"></div>
+      </mat-card>
+
+    </div>
+
+    <!-- =========================
+         ADMIN PANEL
+    ========================= -->
+    <div *ngIf="isAdmin" class="admin-section">
+
+      <h2 class="section-title">Admin Dashboard</h2>
+
+      <!-- ADMIN KPI -->
+      <div class="kpi-grid">
+
+        <mat-card class="glass-card kpi-card">
+          <h3>Total Users</h3>
+          <div class="kpi-value">{{ adminData?.summary?.total_users }}</div>
+        </mat-card>
+
+        <mat-card class="glass-card kpi-card">
+          <h3>Active Users</h3>
+          <div class="kpi-value">{{ adminData?.summary?.active_users }}</div>
+        </mat-card>
+
+        <mat-card class="glass-card kpi-card">
+          <h3>Admins</h3>
+          <div class="kpi-value">{{ adminData?.summary?.admin_users }}</div>
+        </mat-card>
+
+        <mat-card class="glass-card kpi-card">
+          <h3>Inactive</h3>
+          <div class="kpi-value">{{ adminData?.summary?.inactive_users }}</div>
+        </mat-card>
+
+      </div>
+
+      <!-- ADMIN CHARTS -->
+      <div class="chart-grid">
+
+        <mat-card class="glass-card chart-card">
+          <h3>User Roles</h3>
+          <div echarts [options]="roleChart"></div>
+        </mat-card>
+
+        <mat-card class="glass-card chart-card">
+          <h3>Registrations (30d)</h3>
+          <div echarts [options]="registrationChart"></div>
+        </mat-card>
+
+      </div>
+
+    </div>
+  </mat-card>
+</div>

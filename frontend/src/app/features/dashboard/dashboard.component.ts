@@ -5,25 +5,37 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 
 import { forkJoin } from 'rxjs';
-import { NgxEchartsModule } from 'ngx-echarts';
+import { EChartsOption } from 'echarts';
 
 import { DashboardService } from '../../core/services/dashboard.service';
 import { AuthService } from '../../core/services/auth.service';
-
-
+import { NgxEchartsDirective } from 'ngx-echarts';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, MatCardModule, MatIconModule, NgxEchartsModule],
+  imports: [CommonModule, MatCardModule, MatIconModule, NgxEchartsDirective],
   templateUrl: './dashboard.html',
   styleUrls: ['./dashboard.css'],
 })
 export class DashboardComponent implements OnInit {
+
+  genderChart!: EChartsOption;
+  ageChart!: EChartsOption;
+  fingerChart!: EChartsOption;
+  handChart!: EChartsOption;
+  countryChart!: EChartsOption;
+  cityChart!: EChartsOption;
+  ageGenderChart!: EChartsOption;
+  countryGenderChart!: EChartsOption;
+
+  roleChart!: EChartsOption;
+  registrationChart!: EChartsOption;
+
+
   data: any;
   adminData: any;
   isAdmin: boolean = false;
-
   loading: boolean = true;
 
   constructor(

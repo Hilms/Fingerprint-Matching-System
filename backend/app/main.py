@@ -13,6 +13,7 @@ from app.api.user import router as user_router
 from app.api.subject import router as subject_router
 from app.api.import_data import router as import_router
 from app.api.fingerprint import router as fingerprint_router
+from app.api.dashboard import router as dashboard_router
 
 from app.dependencies import user_service
 
@@ -62,3 +63,4 @@ app.include_router(user_router)
 app.include_router(subject_router)
 app.include_router(import_router)
 app.include_router(fingerprint_router)
+app.include_router(dashboard_router)
