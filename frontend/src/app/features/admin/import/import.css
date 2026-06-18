@@ -2,10 +2,10 @@
 .import-wrapper {
   display: flex;
   justify-content: center;
-  width: 100%;
   min-height: 100vh;
   overflow-y: auto;
   color: #e0e0e0;
+  padding:20px;
 }
 
 .import-card {
@@ -15,7 +15,6 @@
   background: rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(10px);
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
-  margin-top: 20px;
 }
 
 h2 {

@@ -1,8 +1,20 @@
+.management-wrapper{
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+  padding:20px;
+}
+
+.management-card{
+  min-width: 0;
+}
+
 .management-card,
 .edit-card,
 .password-card,
 .add-user-card {
-  margin-top: 20px;
   padding: 24px;
   background: rgba(255,255,255,.05);
   color: white;
@@ -48,6 +60,11 @@
 /*
   USER TABLE
 */
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
 table {
   width: 100%;
 }
