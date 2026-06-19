@@ -42,15 +42,15 @@ MinIO (image storage)
 # 👥 User Roles
 
 ## 🔐 Admin
-- Upload fingerprint images
-- Insert new fingerprint records
-- Manage system data
-- Perform searches
+- Upload fingerprint data
+- Add, update, search and delete fingerprint records
+- Add, update, search and delete subject records
+- Add, update, search and delete user records
 - Full access to all endpoints
 
 ## 👤 User
 - Login required
-- Can only search fingerprints
+- Can only view, search and match fingerprint data
 - Cannot upload or modify data
 
 ---
@@ -66,7 +66,6 @@ MinIO (image storage)
 - created_at
 
 ## Subjects Table (Dataset Identity)
-- id
 - external_id (from filename grouping)
 - name
 - age
@@ -85,6 +84,25 @@ MinIO (image storage)
 - filename (original image name)
 - feature_vector (pgvector)
 - created_at
+  
+---
+
+# 🗄️ Materialzized Views
+- mv_gender_stats;
+- mv_finger_stats;
+- mv_hand_stats;
+- mv_country_stats;
+- mv_city_stats;
+- mv_age_stats;
+- mv_age_gender_stats;
+- mv_country_gender_stats;
+- mv_city_gender_stats;
+- mv_user_summary;
+- mv_user_roles;
+- mv_user_registrations_30d;
+
+## Purpose
+Views feed dashboard charts with system data statistics
 
 ---
 
@@ -99,10 +117,11 @@ MinIO (image storage)
 - Store images in MinIO
 - Extract feature vectors
 - Similarity search using pgvector
+- Exact matching through minutiea
+- Visualization of matching points
 
 ## Storage
 - MinIO bucket-based file storage
-- Automatic bucket creation on startup
 
 ---
 
@@ -137,7 +156,7 @@ docker compose up --build
 - JWT authentication required
 - Role-based access control:
     - admin → full access
-    - user → search only
+    - user → view, search, match fingerprint data
 
 ---
 
@@ -145,9 +164,10 @@ docker compose up --build
 
 The system uses vector similarity search:
 
-- Fingerprints are converted into feature vectors
+- Fingerprints preproccessed and converted into correlation/intesity feature vectors
 - Stored using pgvector in PostgreSQL
-- Queries return closest matches using distance metrics
+- Queries return closest matches using distance metrics (prefilter)
+- Candidatedets will then matched by extracting fingerprint landmark points (minutiae)
 
 ---
 
@@ -159,20 +179,12 @@ The system uses vector similarity search:
 
 ---
 
-# ⚠️ Important Notes
-
-- PostgreSQL is NOT accessible via browser
-- MinIO must be running before uploads
-- Services communicate via Docker network names (db, backend, minio)
-
----
-
 # 📌 Project Purpose
 
 A secure biometric system where:
-- Admins manage fingerprint data
-- Users can search fingerprints
-- System uses vector-based similarity matching
+- Admins manage systemdata data
+- Users can view, search, match fingerprints
+- System uses vector-based and minutiae based similarity matching
 - Everything runs in a Dockerized microservice architecture
 ```
 ```
