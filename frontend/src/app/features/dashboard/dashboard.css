@@ -10,7 +10,6 @@
 
 .dashboard-wrapper {
   width: 100%;
-  min-height: 100vh;
   background: rgba(255, 255, 255, 0.06) !important; /* prevents white material background */
   color: #e0e0e0;
   display: flex;
@@ -37,8 +36,9 @@
 
 .kpi-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
   gap: 15px;
+  justify-self: anchor-center;
 }
 
 .kpi-card {
@@ -46,9 +46,8 @@
 }
 
 .kpi-value {
-  font-size: 28px;
-  font-weight: 700;
-  margin-top: 10px;
+  font-size: 20px;
+  padding-bottom: 8px;
 }
 
 /* =========================
@@ -57,7 +56,7 @@
 
 .chart-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(15vw, 1fr));
   gap: 15px;
 }
 
@@ -93,10 +92,6 @@
 ========================= */
 
 .admin-section {
-  margin-top: 40px;
-  padding-top: 30px;
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
-
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -123,4 +118,15 @@
 
 h2, h3 {
   color: white;
+}
+
+/* =========================
+   ERROR MSG
+========================= */
+.response-icon{
+  margin-right: 10px;
+}
+
+.response-card.error-card{
+  border-left: 4px solid #f44336;
 }

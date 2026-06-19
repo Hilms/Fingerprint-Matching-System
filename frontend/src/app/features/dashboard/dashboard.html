@@ -1,5 +1,72 @@
 <div class="page-container">
 
+  <mat-card
+    *ngIf="errorVisible"
+    class="response-card error-card"
+  >
+    <mat-icon class="response-icon">
+      cancle
+    </mat-icon>
+
+    <span>{{ successMessage }}</span>
+  </mat-card>
+
+  <mat-card class="dashboard-wrapper" *ngIf="isAdmin">
+    <!-- =========================
+         ADMIN PANEL
+    ========================= -->
+    <div class="admin-section">
+
+      <h2 class="section-title">Admin Dashboard</h2>
+
+      <!-- ADMIN KPI -->
+      <div class="kpi-grid">
+
+        <mat-card class="glass-card kpi-card">
+          <h3>Total Users</h3>
+          <div class="kpi-value">{{ adminData?.summary?.total_users }}</div>
+        </mat-card>
+
+        <mat-card class="glass-card kpi-card">
+          <h3>Active Users</h3>
+          <div class="kpi-value">{{ adminData?.summary?.active_users }}</div>
+        </mat-card>
+
+        <mat-card class="glass-card kpi-card">
+          <h3>Inactive</h3>
+          <div class="kpi-value">{{ adminData?.summary?.inactive_users }}</div>
+        </mat-card>
+
+        <mat-card class="glass-card kpi-card">
+          <h3>Normal Users</h3>
+          <div class="kpi-value">{{ adminData?.summary?.normal_users }}</div>
+        </mat-card>
+
+        <mat-card class="glass-card kpi-card">
+          <h3>Admins</h3>
+          <div class="kpi-value">{{ adminData?.summary?.admin_users }}</div>
+        </mat-card>
+
+      </div>
+
+      <!-- ADMIN CHARTS -->
+      <div class="chart-grid">
+
+        <mat-card class="glass-card chart-card">
+          <h3>User Roles</h3>
+          <div echarts [options]="roleChart"></div>
+        </mat-card>
+
+        <mat-card class="glass-card chart-card">
+          <h3>Registrations (30d)</h3>
+          <div echarts [options]="registrationChart"></div>
+        </mat-card>
+
+      </div>
+
+    </div>
+  </mat-card>
+
   <mat-card class="dashboard-wrapper">
 
     <h2>DASHBOARD</h2>
@@ -97,59 +164,20 @@
     <div class="chart-grid full">
 
       <mat-card class="glass-card chart-card large">
+        <h3>City + Gender</h3>
+        <div echarts [options]="cityGenderChart"></div>
+      </mat-card>
+
+    </div>
+
+    <div class="chart-grid full">
+
+      <mat-card class="glass-card chart-card large">
         <h3>Country + Gender</h3>
         <div echarts [options]="countryGenderChart"></div>
       </mat-card>
 
     </div>
-
-    <!-- =========================
-         ADMIN PANEL
-    ========================= -->
-    <div *ngIf="isAdmin" class="admin-section">
-
-      <h2 class="section-title">Admin Dashboard</h2>
-
-      <!-- ADMIN KPI -->
-      <div class="kpi-grid">
-
-        <mat-card class="glass-card kpi-card">
-          <h3>Total Users</h3>
-          <div class="kpi-value">{{ adminData?.summary?.total_users }}</div>
-        </mat-card>
-
-        <mat-card class="glass-card kpi-card">
-          <h3>Active Users</h3>
-          <div class="kpi-value">{{ adminData?.summary?.active_users }}</div>
-        </mat-card>
-
-        <mat-card class="glass-card kpi-card">
-          <h3>Admins</h3>
-          <div class="kpi-value">{{ adminData?.summary?.admin_users }}</div>
-        </mat-card>
-
-        <mat-card class="glass-card kpi-card">
-          <h3>Inactive</h3>
-          <div class="kpi-value">{{ adminData?.summary?.inactive_users }}</div>
-        </mat-card>
-
-      </div>
-
-      <!-- ADMIN CHARTS -->
-      <div class="chart-grid">
-
-        <mat-card class="glass-card chart-card">
-          <h3>User Roles</h3>
-          <div echarts [options]="roleChart"></div>
-        </mat-card>
-
-        <mat-card class="glass-card chart-card">
-          <h3>Registrations (30d)</h3>
-          <div echarts [options]="registrationChart"></div>
-        </mat-card>
-
-      </div>
-
-    </div>
   </mat-card>
+
 </div>

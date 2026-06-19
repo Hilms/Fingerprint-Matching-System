@@ -83,7 +83,6 @@ export interface DashboardResponse {
   country_gender: CountryGenderStat[];
   city_gender: CityGenderStat[];
 
-  // NEW
   age: AgeStat[];
   age_gender: AgeGenderStat[];
 }
