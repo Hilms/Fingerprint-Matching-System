@@ -1,291 +1,297 @@
-<mat-card
-  *ngIf="successVisible"
-  class="response-card"
-  [class.success-card]="successState === 'success'"
-  [class.error-card]="successState === 'error'"
->
-
-  <mat-icon class="response-icon">
-    {{ successState === 'success'
-    ? 'check_circle'
-    : 'cancel' }}
-  </mat-icon>
-
-  <span>{{ successMessage }}</span>
-
-</mat-card>
-
-<mat-card class="management-card">
-
-  <h2>User Management</h2>
-
-  <!-- SEARCH -->
-  <div class="search-row">
-
-    <input
-      [(ngModel)]="searchQuery"
-      placeholder="Search users..."
-    >
-
-    <button
-      mat-raised-button
-      color="primary"
-      (click)="searchUsers()"
-    >
-      Search
-    </button>
-
-    <button
-      mat-icon-button
-      (click)="resetUsers()"
-      matTooltip="Refresh users"
-    >
-      <mat-icon>refresh</mat-icon>
-    </button>
-
-    <button mat-icon-button (click)="openAddUser()" matTooltip="Add user">
-      <mat-icon>add</mat-icon>
-    </button>
-
-  </div>
-
-  <!-- EMPTY STATE -->
-  <p
-    *ngIf="dataSource.data.length === 0"
-    class="empty-state"
-  >
-    No users found.
-  </p>
-
-  <!-- TABLE -->
-  <table
-    mat-table
-    [dataSource]="dataSource"
+<div class="management-wrapper">
+  <mat-card
+    *ngIf="successVisible"
+    class="response-card"
+    [class.success-card]="successState === 'success'"
+    [class.error-card]="successState === 'error'"
   >
 
-    <ng-container matColumnDef="username">
-      <th mat-header-cell *matHeaderCellDef>Username</th>
-      <td mat-cell *matCellDef="let user">
-        {{ user.username }}
-      </td>
-    </ng-container>
+    <mat-icon class="response-icon">
+      {{ successState === 'success'
+      ? 'check_circle'
+      : 'cancel' }}
+    </mat-icon>
 
-    <ng-container matColumnDef="first_name">
-      <th mat-header-cell *matHeaderCellDef>First Name</th>
-      <td mat-cell *matCellDef="let user">
-        {{ user.first_name }}
-      </td>
-    </ng-container>
+    <span>{{ successMessage }}</span>
 
-    <ng-container matColumnDef="last_name">
-      <th mat-header-cell *matHeaderCellDef>Last Name</th>
-      <td mat-cell *matCellDef="let user">
-        {{ user.last_name }}
-      </td>
-    </ng-container>
+  </mat-card>
 
-    <ng-container matColumnDef="email">
-      <th mat-header-cell *matHeaderCellDef>Email</th>
-      <td mat-cell *matCellDef="let user">
-        {{ user.email }}
-      </td>
-    </ng-container>
+  <mat-card class="management-card">
 
-    <ng-container matColumnDef="role">
-      <th mat-header-cell *matHeaderCellDef>Role</th>
-      <td mat-cell *matCellDef="let user">
-        {{ user.role }}
-      </td>
-    </ng-container>
+    <h2>User Management</h2>
 
-    <ng-container matColumnDef="is_active">
-      <th mat-header-cell *matHeaderCellDef>Active</th>
-      <td mat-cell *matCellDef="let user">
-        {{ user.is_active }}
-      </td>
-    </ng-container>
+    <!-- SEARCH -->
+    <div class="search-row">
 
-    <!-- ACTIONS -->
-    <ng-container matColumnDef="actions">
-      <th mat-header-cell *matHeaderCellDef>Actions</th>
+      <input
+        [(ngModel)]="searchQuery"
+        placeholder="Search users..."
+      >
 
-      <td mat-cell *matCellDef="let user">
+      <button
+        mat-raised-button
+        color="primary"
+        (click)="searchUsers()"
+      >
+        Search
+      </button>
 
-        <button mat-icon-button (click)="editUser(user)">
-          <mat-icon>edit</mat-icon>
-        </button>
+      <button
+        mat-icon-button
+        (click)="resetUsers()"
+        matTooltip="Refresh users"
+      >
+        <mat-icon>refresh</mat-icon>
+      </button>
 
-        <button mat-icon-button (click)="deleteUser(user)">
-          <mat-icon>delete</mat-icon>
-        </button>
+      <button mat-icon-button (click)="openAddUser()" matTooltip="Add user">
+        <mat-icon>add</mat-icon>
+      </button>
 
-        <button mat-icon-button (click)="openPasswordReset(user)">
-          <mat-icon>lock</mat-icon>
-        </button>
+    </div>
 
-      </td>
-    </ng-container>
-
-    <!-- HEADER + ROW -->
-    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-
-    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-
-  </table>
-
-</mat-card>
-
-<!-- EDIT CARD -->
-<mat-card *ngIf="selectedUser" class="edit-card">
-
-  <div class="card-header">
-
-    <h2>Edit User</h2>
-
-    <button mat-icon-button class="close-btn" (click)="cancelEdit()">
-      <mat-icon>close</mat-icon>
-    </button>
-
-  </div>
-
-  <label>First Name</label>
-  <input [(ngModel)]="selectedUser.first_name">
-
-  <label>Last Name</label>
-  <input [(ngModel)]="selectedUser.last_name">
-
-  <label>Email</label>
-  <input [(ngModel)]="selectedUser.email">
-
-  <label>Role</label>
-  <select [(ngModel)]="selectedUser.role">
-    <option value="user">User</option>
-    <option value="admin">Admin</option>
-  </select>
-
-  <div id="edit_active_status">
-    <label>Active</label>
-    <input type="checkbox" [(ngModel)]="selectedUser.is_active">
-  </div>
-
-
-  <div class="buttons">
-
-    <button
-      mat-raised-button
-      color="primary"
-      (click)="saveUser()"
-      [disabled]="!isUserChanged()"
+    <!-- EMPTY STATE -->
+    <p
+      *ngIf="dataSource.data.length === 0"
+      class="empty-state"
     >
-      Save
-    </button>
+      No users found.
+    </p>
 
-  </div>
+    <div class="table-wrapper">
+      <!-- TABLE -->
+      <table
+        mat-table
+        [dataSource]="dataSource"
+      >
 
-</mat-card>
+        <ng-container matColumnDef="username">
+          <th mat-header-cell *matHeaderCellDef>Username</th>
+          <td mat-cell *matCellDef="let user">
+            {{ user.username }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="first_name">
+          <th mat-header-cell *matHeaderCellDef>First Name</th>
+          <td mat-cell *matCellDef="let user">
+            {{ user.first_name }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="last_name">
+          <th mat-header-cell *matHeaderCellDef>Last Name</th>
+          <td mat-cell *matCellDef="let user">
+            {{ user.last_name }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="email">
+          <th mat-header-cell *matHeaderCellDef>Email</th>
+          <td mat-cell *matCellDef="let user">
+            {{ user.email }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="role">
+          <th mat-header-cell *matHeaderCellDef>Role</th>
+          <td mat-cell *matCellDef="let user">
+            {{ user.role }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="is_active">
+          <th mat-header-cell *matHeaderCellDef>Active</th>
+          <td mat-cell *matCellDef="let user">
+            {{ user.is_active }}
+          </td>
+        </ng-container>
+
+        <!-- ACTIONS -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+
+          <td mat-cell *matCellDef="let user">
+
+            <button mat-icon-button (click)="editUser(user)">
+              <mat-icon>edit</mat-icon>
+            </button>
+
+            <button mat-icon-button (click)="deleteUser(user)">
+              <mat-icon>delete</mat-icon>
+            </button>
+
+            <button mat-icon-button (click)="openPasswordReset(user)">
+              <mat-icon>lock</mat-icon>
+            </button>
+
+          </td>
+        </ng-container>
+
+        <!-- HEADER + ROW -->
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+
+      </table>
+    </div>
+
+  </mat-card>
+
+  <!-- EDIT CARD -->
+  <mat-card *ngIf="selectedUser" class="edit-card">
+
+    <div class="card-header">
+
+      <h2>Edit User</h2>
+
+      <button mat-icon-button class="close-btn" (click)="cancelEdit()">
+        <mat-icon>close</mat-icon>
+      </button>
+
+    </div>
+
+    <label>First Name</label>
+    <input [(ngModel)]="selectedUser.first_name">
+
+    <label>Last Name</label>
+    <input [(ngModel)]="selectedUser.last_name">
+
+    <label>Email</label>
+    <input [(ngModel)]="selectedUser.email">
+
+    <label>Role</label>
+    <select [(ngModel)]="selectedUser.role">
+      <option value="user">User</option>
+      <option value="admin">Admin</option>
+    </select>
+
+    <div id="edit_active_status">
+      <label>Active</label>
+      <input type="checkbox" [(ngModel)]="selectedUser.is_active">
+    </div>
 
 
-<!-- PASSWORD CARD -->
-<mat-card *ngIf="passwordUser" class="password-card">
+    <div class="buttons">
+
+      <button
+        mat-raised-button
+        color="primary"
+        (click)="saveUser()"
+        [disabled]="!isUserChanged()"
+      >
+        Save
+      </button>
+
+    </div>
+
+  </mat-card>
 
 
-  <div class="card-header">
+  <!-- PASSWORD CARD -->
+  <mat-card *ngIf="passwordUser" class="password-card">
 
-    <h2>Reset Password</h2>
 
-    <button mat-icon-button class="close-btn" (click)="closePasswordReset()">
-      <mat-icon>close</mat-icon>
-    </button>
+    <div class="card-header">
 
-  </div>
+      <h2>Reset Password</h2>
 
-  <p>User: <strong>{{ passwordUser.username }}</strong></p>
+      <button mat-icon-button class="close-btn" (click)="closePasswordReset()">
+        <mat-icon>close</mat-icon>
+      </button>
 
-  <div class="reset_password_input_container">
-    <mat-form-field appearance="outline" class="full">
-      <mat-label>New Password</mat-label>
-      <input matInput type="password" [(ngModel)]="resetPassword">
-    </mat-form-field>
+    </div>
 
-    <p class="validation error" *ngIf="isPasswordLengthValid(resetPassword)">
+    <p>User: <strong>{{ passwordUser.username }}</strong></p>
+
+    <div class="reset_password_input_container">
+      <mat-form-field appearance="outline" class="full">
+        <mat-label>New Password</mat-label>
+        <input matInput type="password" [(ngModel)]="resetPassword">
+      </mat-form-field>
+
+      <p class="validation error" *ngIf="isPasswordLengthValid(resetPassword)">
+        Password must be at least 6 characters
+      </p>
+
+    </div>
+
+    <div class="reset_password_input_container">
+      <mat-form-field appearance="outline" class="full">
+        <mat-label>Confirm Password</mat-label>
+        <input matInput type="password" [(ngModel)]="confirmPassword">
+      </mat-form-field>
+
+      <p class="validation success" *ngIf="isPasswordValid()">
+        ✓ Looks good
+      </p>
+    </div>
+
+
+    <div class="buttons">
+
+      <button
+        mat-raised-button
+        color="warn"
+        (click)="resetUserPassword()"
+        [disabled]="!isPasswordValid()"
+      >
+        Reset
+      </button>
+
+    </div>
+
+  </mat-card>
+
+  <!-- ADD USER CARD-->
+  <mat-card class="add-user-card" *ngIf="showAddUserForm">
+
+    <div class="card-header">
+      <h2>Add User</h2>
+
+      <button mat-icon-button (click)="closeAddUser()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <input [(ngModel)]="newUser.username" placeholder="Username">
+    <p class="validation error" *ngIf="isUserNameValid(newUser.username)">
+      Please enter a valid username
+    </p>
+    <input [(ngModel)]="newUser.first_name" placeholder="First Name">
+    <p class="validation error" *ngIf="isNameValid(newUser.first_name)">
+      Please enter a valid name
+    </p>
+    <input [(ngModel)]="newUser.last_name" placeholder="Last Name">
+    <p class="validation error" *ngIf="isNameValid(newUser.last_name)">
+      Please enter a valid name
+    </p>
+    <input [(ngModel)]="newUser.email" placeholder="Email">
+    <p class="validation error" *ngIf="isEmailValid(newUser.email)">
+      Please enter a valid email address
+    </p>
+    <input [(ngModel)]="newUser.password" placeholder="Password" type="password">
+    <p class="validation error" *ngIf="isPasswordLengthValid(newUser.password)">
       Password must be at least 6 characters
     </p>
 
-  </div>
+    <select [(ngModel)]="newUser.role">
+      <option value="user">User</option>
+      <option value="admin">Admin</option>
+    </select>
 
-  <div class="reset_password_input_container">
-    <mat-form-field appearance="outline" class="full">
-      <mat-label>Confirm Password</mat-label>
-      <input matInput type="password" [(ngModel)]="confirmPassword">
-    </mat-form-field>
+    <div class="buttons">
+      <button
+        mat-raised-button
+        color="primary"
+        (click)="createUser()"
+        [disabled]="!isNewUserValid()"
+      >
+        Create
+      </button>
+    </div>
 
-    <p class="validation success" *ngIf="isPasswordValid()">
-      ✓ Looks good
-    </p>
-  </div>
+  </mat-card>
+</div>
 
 
-  <div class="buttons">
-
-    <button
-      mat-raised-button
-      color="warn"
-      (click)="resetUserPassword()"
-      [disabled]="!isPasswordValid()"
-    >
-      Reset
-    </button>
-
-  </div>
-
-</mat-card>
-
-<!-- ADD USER CARD-->
-<mat-card class="add-user-card" *ngIf="showAddUserForm">
-
-  <div class="card-header">
-    <h2>Add User</h2>
-
-    <button mat-icon-button (click)="closeAddUser()">
-      <mat-icon>close</mat-icon>
-    </button>
-  </div>
-
-  <input [(ngModel)]="newUser.username" placeholder="Username">
-  <p class="validation error" *ngIf="isUserNameValid(newUser.username)">
-    Please enter a valid username
-  </p>
-  <input [(ngModel)]="newUser.first_name" placeholder="First Name">
-  <p class="validation error" *ngIf="isNameValid(newUser.first_name)">
-    Please enter a valid name
-  </p>
-  <input [(ngModel)]="newUser.last_name" placeholder="Last Name">
-  <p class="validation error" *ngIf="isNameValid(newUser.last_name)">
-    Please enter a valid name
-  </p>
-  <input [(ngModel)]="newUser.email" placeholder="Email">
-  <p class="validation error" *ngIf="isEmailValid(newUser.email)">
-    Please enter a valid email address
-  </p>
-  <input [(ngModel)]="newUser.password" placeholder="Password" type="password">
-  <p class="validation error" *ngIf="isPasswordLengthValid(newUser.password)">
-    Password must be at least 6 characters
-  </p>
-
-  <select [(ngModel)]="newUser.role">
-    <option value="user">User</option>
-    <option value="admin">Admin</option>
-  </select>
-
-  <div class="buttons">
-    <button
-      mat-raised-button
-      color="primary"
-      (click)="createUser()"
-      [disabled]="!isNewUserValid()"
-    >
-      Create
-    </button>
-  </div>
-
-</mat-card>

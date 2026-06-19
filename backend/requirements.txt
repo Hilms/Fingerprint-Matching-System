@@ -13,3 +13,4 @@ opencv_python-headless
 scikit-image
 scipy
 python-multipart
+apscheduler

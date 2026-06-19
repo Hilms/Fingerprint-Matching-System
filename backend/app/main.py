@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import os
 
 from app.db.database import database
+from app.jobs.dashboard_refresh import start_scheduler
 from app.storage.minio_client import init_minio
 
 from app.api.health import router as health_router
@@ -12,6 +13,7 @@ from app.api.user import router as user_router
 from app.api.subject import router as subject_router
 from app.api.import_data import router as import_router
 from app.api.fingerprint import router as fingerprint_router
+from app.api.dashboard import router as dashboard_router
 
 from app.dependencies import user_service
 
@@ -32,6 +34,7 @@ app.add_middleware(
 @app.on_event("startup")
 async def startup():
     await database.connect()
+    start_scheduler(database)
     init_minio()
 
     admin = await user_service.get_user("admin")
@@ -60,3 +63,4 @@ app.include_router(user_router)
 app.include_router(subject_router)
 app.include_router(import_router)
 app.include_router(fingerprint_router)
+app.include_router(dashboard_router)

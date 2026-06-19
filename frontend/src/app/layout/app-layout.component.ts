@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule, Router } from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { AuthService } from '../core/services/auth.service';
 
 @Component({
@@ -12,8 +12,7 @@ import { AuthService } from '../core/services/auth.service';
 })
 export class AppLayoutComponent {
   constructor(
-    private authService: AuthService,
-    private router: Router,
+    private authService: AuthService
   ) {}
 
   get role(): string | null {

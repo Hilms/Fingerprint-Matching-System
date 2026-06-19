@@ -47,7 +47,7 @@ services:
       - "${DB_PORT}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./database/init:/docker-entrypoint-initdb.d
 
   minio:
     image: minio/minio

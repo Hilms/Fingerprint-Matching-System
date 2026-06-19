@@ -1,11 +1,10 @@
-
 .import-wrapper {
   display: flex;
   justify-content: center;
-  width: 100%;
   min-height: 100vh;
   overflow-y: auto;
   color: #e0e0e0;
+  padding:20px;
 }
 
 .import-card {
@@ -15,7 +14,6 @@
   background: rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(10px);
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
-  margin-top: 20px;
 }
 
 h2 {
@@ -32,7 +30,7 @@ h3 {
 /* INFO BOX */
 .info-box {
   background: rgba(255, 255, 255, 0.05);
-  border-left: 4px solid #4caf50;
+  border-left: 4px solid #2196f3;
   padding: 16px;
   border-radius: 10px;
   margin-bottom: 20px;
@@ -54,7 +52,7 @@ h3 {
   padding: 16px;
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.05);
-  border-left: 4px solid #2196f3;
+  border-left: 4px solid #4caf50;
 }
 
 /* RESULT BOX */

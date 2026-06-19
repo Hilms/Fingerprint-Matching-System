@@ -1,0 +1,132 @@
+.page-container {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+  padding:20px;
+  gap: 20px;
+}
+
+.dashboard-wrapper {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.06) !important; /* prevents white material background */
+  color: #e0e0e0;
+  display: flex;
+  flex-direction: column;
+  padding:24px;
+  gap:20px;
+}
+
+/* =========================
+   GLOBAL MAT-CARD OVERRIDE (FIX WHITE ISSUE)
+========================= */
+
+.mat-mdc-card {
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: white !important;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px !important;
+  box-shadow: none !important;
+}
+
+/* =========================
+   KPI GRID
+========================= */
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 15px;
+  justify-self: anchor-center;
+}
+
+.kpi-card {
+  text-align: center;
+}
+
+.kpi-value {
+  font-size: 20px;
+  padding-bottom: 8px;
+}
+
+/* =========================
+   CHART GRID
+========================= */
+
+.chart-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15vw, 1fr));
+  gap: 15px;
+}
+
+.chart-grid.full {
+  grid-template-columns: 1fr;
+}
+
+/* =========================
+   CHART CARD
+========================= */
+
+.chart-card {
+  height: 360px;
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+}
+
+.chart-card.large {
+  height: 420px;
+}
+
+.chart-card h3 {
+  margin: 0 0 10px 0;
+}
+
+.chart-card div {
+  flex: 1;
+}
+
+/* =========================
+   ADMIN SECTION
+========================= */
+
+.admin-section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.section-title {
+  margin: 0;
+  color: white;
+}
+
+/* =========================
+   GLASS CARD CLASS (OPTIONAL BUT SAFE)
+========================= */
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: white !important;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+/* =========================
+   EMPTY STATE SAFETY
+========================= */
+
+h2, h3 {
+  color: white;
+}
+
+/* =========================
+   ERROR MSG
+========================= */
+.response-icon{
+  margin-right: 10px;
+}
+
+.response-card.error-card{
+  border-left: 4px solid #f44336;
+}
