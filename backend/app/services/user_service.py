@@ -329,7 +329,7 @@ class UserService:
         ):
             raise HTTPException(
                 status_code=401,
-                detail="invalid password"
+                detail="invalid password, please enter correct password"
             )
 
         password_hash = hash_password(

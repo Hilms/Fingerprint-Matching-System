@@ -1,0 +1,176 @@
+<div class="profile-wrapper">
+
+  <!-- RESPONSE -->
+  <mat-card
+    *ngIf="successVisible"
+    class="response-card"
+    [class.success-card]="successState === 'success'"
+    [class.error-card]="successState === 'error'"
+  >
+    <mat-icon class="response-icon">
+      {{ successState === 'success' ? 'check_circle' : 'cancel' }}
+    </mat-icon>
+
+    <span>{{ successMessage }}</span>
+  </mat-card>
+
+  <!-- PROFILE -->
+  <mat-card class="profile-card">
+
+    <div class="card-header">
+
+      <div class="">
+        <div class="profile-avatar">
+          <mat-icon class="avatar_icon">account_circle</mat-icon>
+        </div>
+
+        <h2>My Profile</h2>
+      </div>
+
+      <div>
+
+        <button
+          mat-icon-button
+          matTooltip="Edit Profile"
+          (click)="openEditProfile()"
+        >
+          <mat-icon>edit</mat-icon>
+        </button>
+
+        <button
+          mat-icon-button
+          matTooltip="Change Password"
+          (click)="openPasswordForm()"
+        >
+          <mat-icon>lock</mat-icon>
+        </button>
+
+      </div>
+
+    </div>
+
+    <div class="profile-grid">
+
+      <div class="profile-item">
+        <label>Username</label>
+        <span>{{ currentUser?.username }}</span>
+      </div>
+
+      <div class="profile-item">
+        <label>Email</label>
+        <span>{{ currentUser?.email }}</span>
+      </div>
+
+      <div class="profile-item">
+        <label>First Name</label>
+        <span>{{ currentUser?.first_name }}</span>
+      </div>
+
+      <div class="profile-item">
+        <label>Last Name</label>
+        <span>{{ currentUser?.last_name }}</span>
+      </div>
+
+      <div class="profile-item">
+        <label>Role</label>
+        <span>{{ currentUser?.role }}</span>
+      </div>
+
+    </div>
+
+  </mat-card>
+
+  <!-- EDIT PROFILE -->
+  <mat-card
+    *ngIf="editingProfile"
+    class="edit-card"
+  >
+
+    <div class="card-header">
+
+      <h2>Edit Profile</h2>
+
+      <button mat-icon-button (click)="closeEditProfile()">
+        <mat-icon>close</mat-icon>
+      </button>
+
+    </div>
+
+    <input
+      [(ngModel)]="editUser.first_name"
+      placeholder="First Name"
+    >
+
+    <input
+      [(ngModel)]="editUser.last_name"
+      placeholder="Last Name"
+    >
+
+    <input
+      [(ngModel)]="editUser.email"
+      placeholder="Email"
+    >
+
+    <div class="buttons">
+
+      <button
+        mat-raised-button
+        color="primary"
+        (click)="updateProfile()"
+        [disabled]="!inputChanged()"
+      >
+        Save
+      </button>
+
+
+    </div>
+
+  </mat-card>
+
+  <!-- CHANGE PASSWORD -->
+  <mat-card
+    *ngIf="showPasswordForm"
+    class="password-card"
+  >
+
+    <div class="card-header">
+
+      <h2>Change Password</h2>
+
+      <button mat-icon-button (click)="closePasswordForm()">
+        <mat-icon>close</mat-icon>
+      </button>
+
+    </div>
+
+    <input
+      type="password"
+      [(ngModel)]="passwordData.current_password"
+      placeholder="Current Password"
+    >
+
+    <input
+      type="password"
+      [(ngModel)]="passwordData.new_password"
+      placeholder="New Password"
+    >
+    <p class="validation error" *ngIf="isPasswordLengthValid(passwordData.new_password)">
+      Password must be at least 6 characters
+    </p>
+
+    <div class="buttons">
+
+      <button
+        mat-raised-button
+        color="primary"
+        (click)="changePassword()"
+        [disabled]="!isPasswordValid()"
+      >
+        Update Password
+      </button>
+
+    </div>
+
+  </mat-card>
+
+</div>

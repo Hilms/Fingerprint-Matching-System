@@ -6,6 +6,7 @@ import { ImportComponent } from './features/admin/import/import.component';
 import { UserComponent } from './features/admin/user/user.component';
 import { FingerprintComponent } from './features/fingerprint/fingerprint.component';
 import { MatchingComponent } from './features/matching/matching.component';
+import { MyProfileComponent } from './features/profile/profile.component';
 
 import { AuthGuard } from './core/guards/auth.guard';
 import { RoleGuard } from './core/guards/role.guard';
@@ -34,6 +35,10 @@ export const routes: Routes = [
       {
         path: 'matching',
         component: MatchingComponent,
+      },
+      {
+        path: 'profile',
+        component: MyProfileComponent,
       },
 
       // admin only paths
